@@ -1,4 +1,5 @@
 # yet-another-covid-map
+Dashboard displaying statistics and historical information on COVID19. Written in Vue.js.
 
 ## Project setup
 ```
