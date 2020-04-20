@@ -20,6 +20,7 @@ export default {
   data() {
     return {
       data: null,
+      getConfirmed: true
     };
   },
   async mounted() {
@@ -32,6 +33,13 @@ export default {
       maxZoom: 7,
     });
 
+    this.$root.$on("changeDates", async ({from, to}) => {
+      this.data = await fetchData("cases", from, to, "", false, false, false);
+      map
+        .getSource("cases")
+        .setData(convertDataToGeoJson(this.data, this.getConfirmed));
+    });
+
     this.$root.$on("changeShowConfirmed", (getConfirmed) => {
       const firstThreshold = getConfirmed
         ? FIRST_CONFIRMED_THRESHOLD
@@ -39,6 +47,7 @@ export default {
       const secondThreshold = getConfirmed
         ? SECOND_CONFIRMED_THRESHOLD
         : SECOND_DEATHS_THRESHOLD;
+      this.getConfirmed = getConfirmed;
       map
         .getSource("cases")
         .setData(convertDataToGeoJson(this.data, getConfirmed));

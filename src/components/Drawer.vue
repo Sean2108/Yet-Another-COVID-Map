@@ -100,6 +100,7 @@
 </template>
 
 <script>
+import * as _ from "lodash";
 import { fetchData } from "../utils.ts";
 import Chart from "./Chart.vue";
 import News from "./News.vue";
@@ -159,6 +160,9 @@ export default {
     updateDates([fromIndex, toIndex]) {
       this.from = this.data[fromIndex].Date;
       this.to = this.data[toIndex].Date;
+      _.debounce(() => {
+        this.$root.$emit("changeDates", { from: this.from, to: this.to });
+      }, 2000)();
     },
     changeShowConfirmed(showConfirmed) {
       this.$root.$emit("changeShowConfirmed", showConfirmed);
