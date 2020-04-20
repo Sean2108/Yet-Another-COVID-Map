@@ -3,7 +3,7 @@
 </template>
 <script>
 import * as mapboxgl from "mapbox-gl/dist/mapbox-gl.js";
-import { fetchData, convertDataToGeoJson } from "../utils.ts";
+import { fetchData, convertDataToGeoJson, drawLayer } from "../utils.ts";
 
 const FIRST_CONFIRMED_THRESHOLD = 100000;
 const SECOND_CONFIRMED_THRESHOLD = 200000;
@@ -24,6 +24,8 @@ export default {
     const map = new mapboxgl.Map({
       container: "map",
       style: "mapbox://styles/mapbox/dark-v10",
+      minZoom: 1,
+      maxZoom: 7
     });
 
     map.on("load", () => {
@@ -36,99 +38,18 @@ export default {
         },
       });
 
-      map.addLayer({
-        id: "clusters",
-        type: "circle",
-        source: "cases",
-        filter: ["has", "sum"],
-        paint: {
-          "circle-color": [
-            "step",
-            ["get", "sum"],
-            "#51bbd6",
-            this.getConfirmed
-              ? FIRST_CONFIRMED_THRESHOLD
-              : FIRST_DEATHS_THRESHOLD,
-            "#f1f075",
-            this.getConfirmed
-              ? SECOND_CONFIRMED_THRESHOLD
-              : SECOND_DEATHS_THRESHOLD,
-            "#f28cb1",
-          ],
-          "circle-radius": [
-            "step",
-            ["get", "sum"],
-            20,
-            this.getConfirmed
-              ? FIRST_CONFIRMED_THRESHOLD
-              : FIRST_DEATHS_THRESHOLD,
-            30,
-            this.getConfirmed
-              ? SECOND_CONFIRMED_THRESHOLD
-              : SECOND_DEATHS_THRESHOLD,
-            40,
-          ],
-        },
-      });
-
-      map.addLayer({
-        id: "cluster-count",
-        type: "symbol",
-        source: "cases",
-        filter: ["has", "sum"],
-        layout: {
-          "text-field": "{sum}",
-          "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
-          "text-size": 12,
-        },
-      });
-
-      map.addLayer({
-        id: "non-clusters",
-        type: "circle",
-        source: "cases",
-        filter: ["!", ["has", "sum"]],
-        paint: {
-          "circle-color": [
-            "step",
-            ["get", "value"],
-            "#51bbd6",
-            this.getConfirmed
-              ? FIRST_CONFIRMED_THRESHOLD
-              : FIRST_DEATHS_THRESHOLD,
-            "#f1f075",
-            this.getConfirmed
-              ? SECOND_CONFIRMED_THRESHOLD
-              : SECOND_DEATHS_THRESHOLD,
-            "#f28cb1",
-          ],
-          "circle-radius": [
-            "step",
-            ["get", "value"],
-            20,
-            this.getConfirmed
-              ? FIRST_CONFIRMED_THRESHOLD
-              : FIRST_DEATHS_THRESHOLD,
-            30,
-            this.getConfirmed
-              ? SECOND_CONFIRMED_THRESHOLD
-              : SECOND_DEATHS_THRESHOLD,
-            40,
-          ],
-        },
-      });
-
-      map.addLayer({
-        id: "points",
-        type: "symbol",
-        source: "cases",
-        filter: ["!", ["has", "sum"]],
-        layout: {
-          "text-field": ["get", "value"],
-          "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
-          "text-size": 12,
-        },
-      });
+      drawLayer(
+        map,
+        true,
+        this.getConfirmed ? FIRST_CONFIRMED_THRESHOLD : FIRST_DEATHS_THRESHOLD,
+        this.getConfirmed ? SECOND_CONFIRMED_THRESHOLD : SECOND_DEATHS_THRESHOLD
+      );
+      drawLayer(
+        map,
+        false,
+        this.getConfirmed ? FIRST_CONFIRMED_THRESHOLD : FIRST_DEATHS_THRESHOLD,
+        this.getConfirmed ? SECOND_CONFIRMED_THRESHOLD : SECOND_DEATHS_THRESHOLD
+      );
 
       map.on("click", "clusters", function(e) {
         const features = map.queryRenderedFeatures(e.point, {

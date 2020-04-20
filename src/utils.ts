@@ -59,3 +59,48 @@ export function convertDataToGeoJson(data: CaseCounts, getConfirmed: boolean): G
     features,
   };
 }
+
+
+export const drawLayer = (map: mapboxgl.Map, isCluster: boolean, firstThreshold: number, secondThreshold: number): void => {
+  const id = isCluster ? "clusters" : "non-clusters";
+  const filter = isCluster ? ["has", "sum"] : ["!", ["has", "sum"]];
+  const prop = isCluster ? "sum" : "value";
+  map.addLayer({
+    id,
+    type: "circle",
+    source: "cases",
+    filter,
+    paint: {
+      "circle-color": [
+        "step",
+        ["get", prop],
+        "#51bbd6",
+        firstThreshold,
+        "#f1f075",
+        secondThreshold,
+        "#f28cb1",
+      ],
+      "circle-radius": [
+        "step",
+        ["get", prop],
+        20,
+        firstThreshold,
+        30,
+        secondThreshold,
+        40,
+      ],
+    },
+  });
+
+  map.addLayer({
+    id: `${id}-count`,
+    type: "symbol",
+    source: "cases",
+    filter,
+    layout: {
+      "text-field": isCluster ? "{sum}" : ["get", "value"],
+      "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
+      "text-size": 12,
+    },
+  });
+};
