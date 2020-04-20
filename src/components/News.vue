@@ -1,0 +1,49 @@
+<template>
+  <v-list
+    v-if="news"
+    style="max-height:400px"
+    class="overflow-y-auto"
+    two-line
+    dense
+    tile
+  >
+    <v-card
+      v-for="newsItem in news"
+      class="news-card"
+      :key="newsItem.Title"
+      :href="newsItem.URL"
+    >
+      <v-list-item>
+        <v-list-item-avatar>
+          <v-img :src="newsItem.ThumbnailURL" alt="" />
+        </v-list-item-avatar>
+        <v-list-item-content>
+          <v-list-item-title>{{ newsItem.Title }}</v-list-item-title>
+          <v-list-item-subtitle>{{
+            newsItem.Description
+          }}</v-list-item-subtitle>
+        </v-list-item-content>
+      </v-list-item>
+    </v-card>
+  </v-list>
+</template>
+
+<script>
+import { fetchData } from "../utils/Fetcher.ts";
+export default {
+  async created() {
+    this.news = await fetchData("news", "", "", false, false);
+  },
+  data() {
+    return {
+      news: null,
+    };
+  },
+};
+</script>
+
+<style scoped>
+.news-card {
+  margin-bottom: 4px;
+}
+</style>

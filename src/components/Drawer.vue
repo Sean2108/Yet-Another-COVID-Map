@@ -30,8 +30,8 @@
         </v-list-item-content>
       </v-list-item>
 
-      <v-divider/>
-      
+      <v-divider />
+
       <v-list-item>
         <v-list-item-icon>
           <v-icon>mdi-counter</v-icon>
@@ -60,7 +60,7 @@
         </v-list-item-content>
       </v-list-item>
 
-      <v-divider/>
+      <v-divider />
 
       <v-list-item>
         <v-list-item-icon>
@@ -70,12 +70,12 @@
         <v-list-item-content>
           <v-list-item-title>History</v-list-item-title>
           <v-list-item-subtitle>
-            TODO: add graph
+            <Chart v-if="data" v-bind:data="data" />
           </v-list-item-subtitle>
         </v-list-item-content>
       </v-list-item>
-      
-      <v-divider/>
+
+      <v-divider />
 
       <v-list-item>
         <v-list-item-icon>
@@ -85,7 +85,7 @@
         <v-list-item-content>
           <v-list-item-title>News</v-list-item-title>
           <v-list-item-subtitle>
-            TODO: add news
+            <News />
           </v-list-item-subtitle>
         </v-list-item-content>
       </v-list-item>
@@ -95,11 +95,15 @@
 
 <script>
 import { fetchData } from "../utils/Fetcher.ts";
+import Chart from "./Chart.vue";
+import News from "./News.vue";
 export default {
+  components: {
+    Chart,
+    News,
+  },
   async created() {
-    this.news = fetchData("news", "", "", false, false);
     this.data = await fetchData("cases", "", "", false, true);
-    console.log(this.data)
     this.max = this.data.length - 1;
     this.range = [0, this.max];
     this.from = this.data[0].Date;
@@ -110,7 +114,6 @@ export default {
       drawer: true,
       country: null,
       data: null,
-      news: null,
       range: null,
       min: 0,
       max: null,
