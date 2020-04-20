@@ -94,7 +94,7 @@
 </template>
 
 <script>
-import { fetchData } from "../utils/Fetcher.ts";
+import { fetchData } from "../utils.ts";
 import Chart from "./Chart.vue";
 import News from "./News.vue";
 export default {

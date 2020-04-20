@@ -29,7 +29,7 @@
 </template>
 
 <script>
-import { fetchData } from "../utils/Fetcher.ts";
+import { fetchData } from "../utils.ts";
 export default {
   async created() {
     this.news = await fetchData("news", "", "", false, false);
