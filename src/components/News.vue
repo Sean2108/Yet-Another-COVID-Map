@@ -1,7 +1,7 @@
 <template>
   <v-list
     v-if="news"
-    style="max-height:400px"
+    style="max-height:350px"
     class="overflow-y-auto"
     two-line
     dense
@@ -32,12 +32,23 @@
 import { fetchData } from "../utils.ts";
 export default {
   async created() {
-    this.news = await fetchData("news", "", "", false, false);
+    this.news = await fetchData("news", "", "", "", false, false, false);
   },
   data() {
     return {
       news: null,
     };
+  },
+  props: {
+    country: String,
+  },
+  watch: {
+    country: async function(newVal) {
+      const news = await fetchData("news", "", "", newVal, false, false, false);
+      if (news && news.length) {
+        this.news = news;
+      }
+    },
   },
 };
 </script>

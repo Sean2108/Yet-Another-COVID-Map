@@ -15,18 +15,30 @@
         </v-list-item-icon>
 
         <v-list-item-content>
-          <v-list-item-title>Date Selection</v-list-item-title>
+          <v-list-item-title>Selections</v-list-item-title>
           <v-list-item-subtitle>
             <template v-if="range">
-              <p>From {{ from }} to {{ to }}</p>
               <v-range-slider
                 v-model="range"
                 :max="max"
                 :min="0"
                 hide-details
                 v-on:input="updateDates"
-                class="align-center"/></template
-          ></v-list-item-subtitle>
+                class="align-center"
+              >
+                <template v-slot:prepend>
+                  {{ from }}
+                </template>
+                <template v-slot:append>
+                  {{ to }}
+                </template>
+              </v-range-slider>
+            </template>
+            <v-switch
+              v-model="showConfirmed"
+              :label="showConfirmed ? 'Show Confirmed Cases' : 'Show Deaths'"
+              v-on:change="changeShowConfirmed"
+          /></v-list-item-subtitle>
         </v-list-item-content>
       </v-list-item>
 
@@ -44,17 +56,11 @@
           <v-list-item-subtitle>
             <p v-if="data">
               Confirmed cases:
-              {{
-                data[range[1]].Confirmed -
-                  (range[0] === 0 ? 0 : data[range[0]].Confirmed)
-              }}
+              {{ getConfirmed }}
             </p>
             <p v-if="data">
               Deaths:
-              {{
-                data[range[1]].Deaths -
-                  (range[0] === 0 ? 0 : data[range[0]].Deaths)
-              }}
+              {{ getDeaths }}
             </p>
           </v-list-item-subtitle>
         </v-list-item-content>
@@ -70,7 +76,7 @@
         <v-list-item-content>
           <v-list-item-title>History</v-list-item-title>
           <v-list-item-subtitle>
-            <Chart v-if="data" v-bind:data="data" />
+            <Chart v-if="data" :data="data" />
           </v-list-item-subtitle>
         </v-list-item-content>
       </v-list-item>
@@ -85,7 +91,7 @@
         <v-list-item-content>
           <v-list-item-title>News</v-list-item-title>
           <v-list-item-subtitle>
-            <News />
+            <News :country="country" />
           </v-list-item-subtitle>
         </v-list-item-content>
       </v-list-item>
@@ -103,11 +109,26 @@ export default {
     News,
   },
   async created() {
-    this.data = await fetchData("cases", "", "", false, true);
+    this.data = await fetchData("cases", "", "", "", false, false, true);
     this.max = this.data.length - 1;
     this.range = [0, this.max];
     this.from = this.data[0].Date;
     this.to = this.data[this.max].Date;
+  },
+  mounted() {
+    this.$root.$on("countrySelected", async (country) => {
+      this.country = country;
+      const countryData = await fetchData(
+        "cases",
+        "",
+        "",
+        country,
+        true,
+        true,
+        false
+      );
+      this.data = countryData[country].Counts;
+    });
   },
   data() {
     return {
@@ -119,12 +140,28 @@ export default {
       max: null,
       from: null,
       to: null,
+      showConfirmed: true,
     };
+  },
+  computed: {
+    getConfirmed: function() {
+      const [from, to] = this.range;
+      return (
+        this.data[to].Confirmed - (from === 0 ? 0 : this.data[from].Confirmed)
+      );
+    },
+    getDeaths: function() {
+      const [from, to] = this.range;
+      return this.data[to].Deaths - (from === 0 ? 0 : this.data[from].Deaths);
+    },
   },
   methods: {
     updateDates([fromIndex, toIndex]) {
       this.from = this.data[fromIndex].Date;
       this.to = this.data[toIndex].Date;
+    },
+    changeShowConfirmed(showConfirmed) {
+      this.$root.$emit("changeShowConfirmed", showConfirmed);
     },
   },
 };

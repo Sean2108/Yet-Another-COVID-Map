@@ -11,6 +11,12 @@ export default {
   props: {
     data: Array,
   },
+  watch: {
+    data: function(newVal) {
+      d3.selectAll("svg").remove();
+      this.drawGraph(newVal);
+    },
+  },
   methods: {
     drawGraph(input) {
       const data = input.map(({ Date: d, Confirmed, Deaths }) => ({

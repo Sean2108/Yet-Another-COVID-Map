@@ -3,7 +3,12 @@
 </template>
 <script>
 import * as mapboxgl from "mapbox-gl/dist/mapbox-gl.js";
-import { fetchData, convertDataToGeoJson, drawLayer } from "../utils.ts";
+import {
+  fetchData,
+  convertDataToGeoJson,
+  drawLayer,
+  getMapPaintObj,
+} from "../utils.ts";
 
 const FIRST_CONFIRMED_THRESHOLD = 100000;
 const SECOND_CONFIRMED_THRESHOLD = 200000;
@@ -15,23 +20,56 @@ export default {
   data() {
     return {
       data: null,
-      getConfirmed: true,
     };
   },
   async mounted() {
-    this.data = await fetchData("cases", "", "", false, false);
+    this.data = await fetchData("cases", "", "", "", false, false, false);
     mapboxgl.accessToken = process.env.VUE_APP_MAPBOX_ACCESS_TOKEN;
     const map = new mapboxgl.Map({
       container: "map",
       style: "mapbox://styles/mapbox/dark-v10",
       minZoom: 1,
-      maxZoom: 7
+      maxZoom: 7,
+    });
+
+    this.$root.$on("changeShowConfirmed", (getConfirmed) => {
+      const firstThreshold = getConfirmed
+        ? FIRST_CONFIRMED_THRESHOLD
+        : FIRST_DEATHS_THRESHOLD;
+      const secondThreshold = getConfirmed
+        ? SECOND_CONFIRMED_THRESHOLD
+        : SECOND_DEATHS_THRESHOLD;
+      map
+        .getSource("cases")
+        .setData(convertDataToGeoJson(this.data, getConfirmed));
+      let paintObj = getMapPaintObj(true, firstThreshold, secondThreshold);
+      map.setPaintProperty(
+        "clusters",
+        "circle-color",
+        paintObj["circle-color"]
+      );
+      map.setPaintProperty(
+        "clusters",
+        "circle-radius",
+        paintObj["circle-radius"]
+      );
+      paintObj = getMapPaintObj(false, firstThreshold, secondThreshold);
+      map.setPaintProperty(
+        "non-clusters",
+        "circle-color",
+        paintObj["circle-color"]
+      );
+      map.setPaintProperty(
+        "non-clusters",
+        "circle-radius",
+        paintObj["circle-radius"]
+      );
     });
 
     map.on("load", () => {
       map.addSource("cases", {
         type: "geojson",
-        data: convertDataToGeoJson(this.data, this.getConfirmed),
+        data: convertDataToGeoJson(this.data, true),
         cluster: true,
         clusterProperties: {
           sum: ["+", ["get", "value"]],
@@ -41,14 +79,14 @@ export default {
       drawLayer(
         map,
         true,
-        this.getConfirmed ? FIRST_CONFIRMED_THRESHOLD : FIRST_DEATHS_THRESHOLD,
-        this.getConfirmed ? SECOND_CONFIRMED_THRESHOLD : SECOND_DEATHS_THRESHOLD
+        FIRST_CONFIRMED_THRESHOLD,
+        SECOND_CONFIRMED_THRESHOLD
       );
       drawLayer(
         map,
         false,
-        this.getConfirmed ? FIRST_CONFIRMED_THRESHOLD : FIRST_DEATHS_THRESHOLD,
-        this.getConfirmed ? SECOND_CONFIRMED_THRESHOLD : SECOND_DEATHS_THRESHOLD
+        FIRST_CONFIRMED_THRESHOLD,
+        SECOND_CONFIRMED_THRESHOLD
       );
 
       map.on("click", "clusters", function(e) {
@@ -68,8 +106,8 @@ export default {
           });
       });
 
-      map.on("click", "non-clusters", function(e) {
-        console.log(e.features[0].properties.country);
+      map.on("click", "non-clusters", (e) => {
+        this.$root.$emit("countrySelected", e.features[0].properties.country);
       });
 
       map.on("mouseenter", "clusters", function() {

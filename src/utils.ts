@@ -31,16 +31,21 @@ export async function fetchData(
   endpoint: "cases" | "news",
   from: string,
   to: string,
+  country: string,
   aggregateCountries: boolean,
+  perDay: boolean,
   worldTotal: boolean
 ) {
   const response = await fetch(
-    `https://yet-another-covid-api.herokuapp.com/${endpoint}?from=${from}&to=${to}&aggregateCountries=${aggregateCountries}&worldTotal=${worldTotal}`
+    `https://yet-another-covid-api.herokuapp.com/${endpoint}?from=${from}&to=${to}&country=${country}&aggregatecountries=${aggregateCountries}&perday=${perDay}&worldtotal=${worldTotal}`
   );
   return await response.json();
 }
 
-export function convertDataToGeoJson(data: CaseCounts, getConfirmed: boolean): GeoJson {
+export function convertDataToGeoJson(
+  data: CaseCounts,
+  getConfirmed: boolean
+): GeoJson {
   const features: Array<GeoJsonFeature> = Object.entries(data).flatMap(
     ([country, stateInfo]) =>
       Object.entries(stateInfo).map(
@@ -49,7 +54,11 @@ export function convertDataToGeoJson(data: CaseCounts, getConfirmed: boolean): G
           { Lat: lat, Long: long, Confirmed: confirmed, Deaths: deaths },
         ]): GeoJsonFeature => ({
           type: "Feature",
-          properties: { country, state, value: (getConfirmed ? confirmed : deaths) },
+          properties: {
+            country,
+            state,
+            value: getConfirmed ? confirmed : deaths,
+          },
           geometry: { type: "Point", coordinates: [long, lat, 0.0] },
         })
       )
@@ -60,36 +69,44 @@ export function convertDataToGeoJson(data: CaseCounts, getConfirmed: boolean): G
   };
 }
 
+export function getMapPaintObj(isCluster: boolean, firstThreshold: number, secondThreshold: number): mapboxgl.CirclePaint {
+  const prop = isCluster ? "sum" : "value";
+  return {
+    "circle-color": [
+      "step",
+      ["get", prop],
+      "#51bbd6",
+      firstThreshold,
+      "#f1f075",
+      secondThreshold,
+      "#f28cb1",
+    ],
+    "circle-radius": [
+      "step",
+      ["get", prop],
+      20,
+      firstThreshold,
+      30,
+      secondThreshold,
+      40,
+    ],
+  };
+}
 
-export const drawLayer = (map: mapboxgl.Map, isCluster: boolean, firstThreshold: number, secondThreshold: number): void => {
+export const drawLayer = (
+  map: mapboxgl.Map,
+  isCluster: boolean,
+  firstThreshold: number,
+  secondThreshold: number
+): void => {
   const id = isCluster ? "clusters" : "non-clusters";
   const filter = isCluster ? ["has", "sum"] : ["!", ["has", "sum"]];
-  const prop = isCluster ? "sum" : "value";
   map.addLayer({
     id,
     type: "circle",
     source: "cases",
     filter,
-    paint: {
-      "circle-color": [
-        "step",
-        ["get", prop],
-        "#51bbd6",
-        firstThreshold,
-        "#f1f075",
-        secondThreshold,
-        "#f28cb1",
-      ],
-      "circle-radius": [
-        "step",
-        ["get", prop],
-        20,
-        firstThreshold,
-        30,
-        secondThreshold,
-        40,
-      ],
-    },
+    paint: getMapPaintObj(isCluster, firstThreshold, secondThreshold),
   });
 
   map.addLayer({
