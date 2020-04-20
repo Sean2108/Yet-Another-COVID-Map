@@ -3,10 +3,18 @@
 </template>
 <script>
 import * as mapboxgl from "mapbox-gl/dist/mapbox-gl.js";
+import { fetchData } from "../utils/Fetcher.ts";
 export default {
+  data() {
+    return {
+      data: null,
+    };
+  },
+  created () {
+    this.data = fetchData("cases", "", "", true, false);
+  },
   mounted: () => {
-    mapboxgl.accessToken =
-      "pk.eyJ1Ijoic2VhbjIxMDgiLCJhIjoiY2psbmo5Z3p0MGJ5NTN3czFnNWNwdHY5MyJ9.6ZeKBCi2Pv8bXTYDMEKErw";
+    mapboxgl.accessToken = process.env.VUE_APP_MAPBOX_ACCESS_TOKEN;
     new mapboxgl.Map({
       container: "map",
       style: "mapbox://styles/mapbox/dark-v10",

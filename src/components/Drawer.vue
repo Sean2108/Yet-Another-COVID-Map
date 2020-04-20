@@ -1,30 +1,14 @@
 <template>
   <v-navigation-drawer
     v-model="drawer"
-    :color="color"
-    :expand-on-hover="expandOnHover"
-    :mini-variant="miniVariant"
-    :right="right"
-    :width="500"
+    color="grey darken-2"
+    width="500"
+    expand-on-hover
+    right
     absolute
     dark
   >
     <v-list nav three-line>
-        <v-list-item>
-        <v-list-item-icon>
-          <v-icon>mdi-counter</v-icon>
-        </v-list-item-icon>
-
-        <v-list-item-content>
-          <v-list-item-title>Statistics</v-list-item-title>
-          <v-list-item-subtitle
-            >
-            <p>Confirmed cases: {{confirmed}}</p>
-            <p>Deaths: {{deaths}}</p>
-            </v-list-item-subtitle>
-        </v-list-item-content>
-      </v-list-item>
-
       <v-list-item>
         <v-list-item-icon>
           <v-icon>mdi-calendar-range</v-icon>
@@ -32,12 +16,52 @@
 
         <v-list-item-content>
           <v-list-item-title>Date Selection</v-list-item-title>
-          <v-list-item-subtitle
-            ><DateSlider v-bind:min="0" v-bind:max="10" v-bind:range="[2, 5]"
-          /></v-list-item-subtitle>
+          <v-list-item-subtitle>
+            <template v-if="range">
+              <p>From {{ from }} to {{ to }}</p>
+              <v-range-slider
+                v-model="range"
+                :max="max"
+                :min="0"
+                hide-details
+                v-on:input="updateDates"
+                class="align-center"/></template
+          ></v-list-item-subtitle>
         </v-list-item-content>
       </v-list-item>
+
+      <v-divider/>
       
+      <v-list-item>
+        <v-list-item-icon>
+          <v-icon>mdi-counter</v-icon>
+        </v-list-item-icon>
+
+        <v-list-item-content>
+          <v-list-item-title
+            >Statistics ({{ country ? country : "Global" }})</v-list-item-title
+          >
+          <v-list-item-subtitle>
+            <p v-if="data">
+              Confirmed cases:
+              {{
+                data[range[1]].Confirmed -
+                  (range[0] === 0 ? 0 : data[range[0]].Confirmed)
+              }}
+            </p>
+            <p v-if="data">
+              Deaths:
+              {{
+                data[range[1]].Deaths -
+                  (range[0] === 0 ? 0 : data[range[0]].Deaths)
+              }}
+            </p>
+          </v-list-item-subtitle>
+        </v-list-item-content>
+      </v-list-item>
+
+      <v-divider/>
+
       <v-list-item>
         <v-list-item-icon>
           <v-icon>mdi-chart-line</v-icon>
@@ -51,6 +75,8 @@
         </v-list-item-content>
       </v-list-item>
       
+      <v-divider/>
+
       <v-list-item>
         <v-list-item-icon>
           <v-icon>mdi-newspaper-variant</v-icon>
@@ -68,22 +94,35 @@
 </template>
 
 <script>
-import DateSlider from "./DateSlider.vue";
+import { fetchData } from "../utils/Fetcher.ts";
 export default {
-  components: {
-    DateSlider,
+  async created() {
+    this.news = fetchData("news", "", "", false, false);
+    this.data = await fetchData("cases", "", "", false, true);
+    console.log(this.data)
+    this.max = this.data.length - 1;
+    this.range = [0, this.max];
+    this.from = this.data[0].Date;
+    this.to = this.data[this.max].Date;
   },
   data() {
     return {
       drawer: true,
-      color: "grey darken-2",
-      right: true,
-      miniVariant: false,
-      expandOnHover: true,
-      background: false,
-      confirmed: 10,
-      deaths: 5
+      country: null,
+      data: null,
+      news: null,
+      range: null,
+      min: 0,
+      max: null,
+      from: null,
+      to: null,
     };
+  },
+  methods: {
+    updateDates([fromIndex, toIndex]) {
+      this.from = this.data[fromIndex].Date;
+      this.to = this.data[toIndex].Date;
+    },
   },
 };
 </script>
