@@ -12,6 +12,9 @@ export async function fetchData(
   const response = await fetch(
     `https://yet-another-covid-api.herokuapp.com/${endpoint}?from=${from}&to=${to}&country=${country}&aggregatecountries=${aggregateCountries}&perday=${perDay}&worldtotal=${worldTotal}`
   );
+  if (response.status !== 200) {
+    return null;
+  }
   return await response.json();
 }
 

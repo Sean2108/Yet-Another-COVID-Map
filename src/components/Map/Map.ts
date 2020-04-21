@@ -238,7 +238,7 @@ export default Vue.extend({
       })
     );
 
-    this.$root.$on("mapChangeDates", (obj: { from: string; to: string }) =>
+    this.$root.$on("changeDates", (obj: { from: string; to: string }) =>
       this.onChangeDates(map, obj)
     );
 

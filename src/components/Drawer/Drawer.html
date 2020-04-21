@@ -7,53 +7,18 @@
   absolute
   dark
 >
-
-<v-list-item nav>
-  <v-list-item-icon>
-    <v-icon>mdi-earth</v-icon>
-  </v-list-item-icon>
-
-  <v-list-item-content>
-    <v-list-item-title>Global Data</v-list-item-title>
-  </v-list-item-content>
-</v-list-item>
-
-  <v-list nav three-line>
-    <v-list-item>
+    <v-list-item nav>
       <v-list-item-icon>
-        <v-icon>mdi-calendar-range</v-icon>
+        <v-icon>mdi-earth</v-icon>
       </v-list-item-icon>
 
       <v-list-item-content>
-        <v-list-item-title>Selections</v-list-item-title>
-        <v-list-item-subtitle>
-          <template v-if="range">
-            <v-range-slider
-              v-model="range"
-              :max="max"
-              :min="0"
-              hide-details
-              v-on:input="updateDates"
-              class="align-center"
-            >
-              <template v-slot:prepend>
-                {{ from }}
-              </template>
-              <template v-slot:append>
-                {{ to }}
-              </template>
-            </v-range-slider>
-          </template>
-          <v-switch
-            v-model="showConfirmed"
-            :label="showConfirmed ? 'Show Confirmed Cases' : 'Show Deaths'"
-            v-on:change="changeShowConfirmed"
-        /></v-list-item-subtitle>
+        <v-list-item-title>Global Data</v-list-item-title>
       </v-list-item-content>
     </v-list-item>
 
-    <v-divider />
-
+    <v-list nav three-line>
+      
     <v-list-item>
       <v-list-item-icon>
         <v-icon>mdi-counter</v-icon>
@@ -106,7 +71,7 @@
       <v-list-item-content>
         <v-list-item-title>News</v-list-item-title>
         <v-list-item-subtitle>
-          <News :country="country" :news="news" />
+          <News country="" :news="news" />
         </v-list-item-subtitle>
       </v-list-item-content>
     </v-list-item>
