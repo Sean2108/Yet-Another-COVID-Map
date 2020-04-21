@@ -1,9 +1,9 @@
 import Vue from "vue";
 import { fetchData } from "../../utils";
-import { News } from '@/types';
+import { News } from "@/types";
 
 interface ComponentData {
-    news: Array<News> | null;
+  news: Array<News> | null;
 }
 
 export default Vue.extend({
@@ -20,7 +20,15 @@ export default Vue.extend({
   },
   watch: {
     country: async function(newCountry: string) {
-      const news = await fetchData("news", "", "", newCountry, false, false, false);
+      const news = await fetchData(
+        "news",
+        "",
+        "",
+        newCountry,
+        false,
+        false,
+        false
+      );
       if (news && news.length) {
         this.news = news;
       }

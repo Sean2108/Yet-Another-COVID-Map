@@ -6,13 +6,17 @@ import {
   drawLayer,
   getMapPaintObj,
 } from "../../utils";
-import { CaseCounts, GeoJsonFeature } from "@/types";
+import { CaseCounts } from "@/types";
 
 const FIRST_CONFIRMED_THRESHOLD = 100000;
 const SECOND_CONFIRMED_THRESHOLD = 200000;
 
 const FIRST_DEATHS_THRESHOLD = 10000;
 const SECOND_DEATHS_THRESHOLD = 20000;
+
+const INITIAL_ZOOM = 2;
+const MIN_ZOOM = 1;
+const MAX_ZOOM = 7;
 
 interface ComponentData {
   data: CaseCounts | null;
@@ -26,36 +30,18 @@ export default Vue.extend({
       getConfirmed: true,
     };
   },
-  async mounted() {
-    this.data = await fetchData("cases", "", "", "", false, false, false);
-    (mapboxgl as any).accessToken = process.env.VUE_APP_MAPBOX_ACCESS_TOKEN;
-    const map = new mapboxgl.Map({
-      container: "map",
-      style: "mapbox://styles/mapbox/dark-v10",
-      minZoom: 1,
-      maxZoom: 7,
-    });
-
-    this.$root.$on(
-      "changeDates",
-      async ({ from, to }: { from: string; to: string }) => {
-        const data = await fetchData(
-          "cases",
-          from,
-          to,
-          "",
-          false,
-          false,
-          false
-        );
-        this.data = data;
-        (map.getSource("cases") as mapboxgl.GeoJSONSource).setData(
-          convertDataToGeoJson(data, this.getConfirmed) as any
-        );
-      }
-    );
-
-    this.$root.$on("changeShowConfirmed", (getConfirmed: boolean) => {
+  methods: {
+    onChangeDates: async function(
+      map: mapboxgl.Map,
+      { from, to }: { from: string; to: string }
+    ) {
+      const data = await fetchData("cases", from, to, "", false, false, false);
+      this.data = data;
+      (map.getSource("cases") as mapboxgl.GeoJSONSource).setData(
+        convertDataToGeoJson(data, this.getConfirmed) as any
+      );
+    },
+    onChangeShowConfirmed: function(map: mapboxgl.Map, getConfirmed: boolean) {
       const firstThreshold = getConfirmed
         ? FIRST_CONFIRMED_THRESHOLD
         : FIRST_DEATHS_THRESHOLD;
@@ -92,9 +78,16 @@ export default Vue.extend({
         "circle-radius",
         paintObj["circle-radius"]
       );
-    });
-
-    map.on("load", () => {
+    },
+    setupMouseEnterAndLeave(map: mapboxgl.Map, layerName: string) {
+      map.on("mouseenter", layerName, function() {
+        map.getCanvas().style.cursor = "pointer";
+      });
+      map.on("mouseleave", layerName, function() {
+        map.getCanvas().style.cursor = "";
+      });
+    },
+    setupMap(map: mapboxgl.Map) {
       const data = this.data;
       if (!data) {
         return;
@@ -146,13 +139,30 @@ export default Vue.extend({
           this.$root.$emit("countrySelected", e.features[0].properties.country);
         }
       });
-
-      map.on("mouseenter", "clusters", function() {
-        map.getCanvas().style.cursor = "pointer";
-      });
-      map.on("mouseleave", "clusters", function() {
-        map.getCanvas().style.cursor = "";
-      });
+      this.setupMouseEnterAndLeave(map, "clusters");
+      this.setupMouseEnterAndLeave(map, "non-clusters");
+    },
+  },
+  async mounted() {
+    this.data = await fetchData("cases", "", "", "", false, false, false);
+    (mapboxgl as any).accessToken = process.env.VUE_APP_MAPBOX_ACCESS_TOKEN;
+    const map = new mapboxgl.Map({
+      container: "map",
+      style: "mapbox://styles/mapbox/dark-v10",
+      center: [0, 30],
+      zoom: INITIAL_ZOOM,
+      minZoom: MIN_ZOOM,
+      maxZoom: MAX_ZOOM,
     });
+
+    this.$root.$on("changeDates", (obj: { from: string; to: string }) =>
+      this.onChangeDates(map, obj)
+    );
+
+    this.$root.$on("changeShowConfirmed", (getConfirmed: boolean) =>
+      this.onChangeShowConfirmed(map, getConfirmed)
+    );
+
+    map.on("load", () => this.setupMap(map));
   },
 });
