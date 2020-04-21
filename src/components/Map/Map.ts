@@ -203,7 +203,15 @@ export default Vue.extend({
       zoom: INITIAL_ZOOM,
       minZoom: MIN_ZOOM,
       maxZoom: MAX_ZOOM,
-    });
+      attributionControl: false,
+    }).addControl(
+      new mapboxgl.AttributionControl({
+        customAttribution: [
+          '<a href="https://github.com/Sean2108">© Sean Tan</a>',
+          '<a href="https://newsapi.org">© NewsAPI.org</a>',
+        ],
+      })
+    );
 
     this.$root.$on("changeDates", (obj: { from: string; to: string }) =>
       this.onChangeDates(map, obj)
