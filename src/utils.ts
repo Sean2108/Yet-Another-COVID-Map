@@ -1,31 +1,4 @@
-interface CaseCounts {
-  [country: string]: {
-    [state: string]: {
-      Lat: number;
-      Long: number;
-      Confirmed: number;
-      Deaths: number;
-    };
-  };
-}
-
-interface GeoJson {
-  type: string;
-  features: Array<GeoJsonFeature>;
-}
-
-interface GeoJsonFeature {
-  type: string;
-  properties: {
-    country: string;
-    state: string;
-    value: number;
-  };
-  geometry: {
-    type: string;
-    coordinates: Array<number>;
-  };
-}
+import { CaseCounts, GeoJson, GeoJsonFeature } from "@/types";
 
 export async function fetchData(
   endpoint: "cases" | "news",
@@ -69,7 +42,11 @@ export function convertDataToGeoJson(
   };
 }
 
-export function getMapPaintObj(isCluster: boolean, firstThreshold: number, secondThreshold: number): mapboxgl.CirclePaint {
+export function getMapPaintObj(
+  isCluster: boolean,
+  firstThreshold: number,
+  secondThreshold: number
+): mapboxgl.CirclePaint {
   const prop = isCluster ? "sum" : "value";
   return {
     "circle-color": [

@@ -11,8 +11,8 @@
 
 <script lang="ts">
 import Vue from "vue";
-import Drawer from "./components/Drawer.vue";
-import Map from "./components/Map.vue";
+import Drawer from "./components/Drawer/Drawer.vue";
+import Map from "./components/Map/Map.vue";
 
 export default Vue.extend({
   name: "App",
