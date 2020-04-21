@@ -1,0 +1,80 @@
+<v-expansion-panels accordion focusable dark>
+  <v-subheader light>{{getHeader()}}</v-subheader>
+
+  <v-expansion-panel v-if="stateData">
+    <v-expansion-panel-header disable-icon-rotate expand-icon="mdi-counter">
+      Statistics (State)</v-expansion-panel-header
+    >
+    <v-expansion-panel-content>
+      <br />
+      <p v-if="stateData">
+        Confirmed cases: {{ getStateConfirmed }}
+      </p>
+      <p v-if="stateData">
+        Deaths: {{ getStateDeaths }}
+      </p>
+    </v-expansion-panel-content>
+  </v-expansion-panel>
+
+  <v-expansion-panel v-if="countryData">
+    <v-expansion-panel-header disable-icon-rotate expand-icon="mdi-counter">
+      {{state ? "Statistics (Country)" :
+      "Statistics"}}</v-expansion-panel-header
+    >
+    <v-expansion-panel-content>
+      <br />
+      <p v-if="countryData">
+        Confirmed cases: {{ getCountryConfirmed }}
+      </p>
+      <p v-if="countryData">
+        Deaths: {{ getCountryDeaths }}
+      </p>
+    </v-expansion-panel-content>
+  </v-expansion-panel>
+
+  <v-expansion-panel v-if="stateData">
+    <v-expansion-panel-header disable-icon-rotate expand-icon="mdi-chart-line">
+      History (State)</v-expansion-panel-header
+    >
+    <v-expansion-panel-content>
+      <Chart
+        :data="stateData"
+        id="stateChart"
+        :width="370"
+        :height="200"
+        :legendX="100"
+        :legendY="10"
+        :marginHorizontal="30"
+      />
+    </v-expansion-panel-content>
+  </v-expansion-panel>
+
+  <v-expansion-panel v-if="countryData">
+    <v-expansion-panel-header disable-icon-rotate expand-icon="mdi-chart-line">
+      {{state ? "History (Country)" : "History"}}</v-expansion-panel-header
+    >
+    <v-expansion-panel-content>
+      <Chart
+        :data="countryData"
+        id="countryChart"
+        :width="370"
+        :height="200"
+        :legendX="100"
+        :legendY="10"
+        :marginHorizontal="50"
+      />
+    </v-expansion-panel-content>
+  </v-expansion-panel>
+
+  <v-expansion-panel v-if="hasNews">
+    <v-expansion-panel-header
+      disable-icon-rotate
+      expand-icon="mdi-newspaper-variant"
+    >
+      News</v-expansion-panel-header
+    >
+    <v-expansion-panel-content>
+      <News :news="news" height="200"
+    /></v-expansion-panel-content>
+  </v-expansion-panel>
+</v-expansion-panels>

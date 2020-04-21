@@ -39,7 +39,7 @@ export interface CaseCount {
   deaths: number;
 }
 
-export interface News {
+export interface NewsItem {
     Source: string;
     Title: string;
     Description: string;

@@ -2,6 +2,8 @@ import * as mapboxgl from "mapbox-gl";
 import Vue from "vue";
 import { fetchData, convertDataToGeoJson } from "../../utils";
 import { CaseCounts } from "@/types";
+import Vuetify from "vuetify/lib";
+import StateInfo from "../StateInfo/StateInfo.vue";
 
 const FIRST_CONFIRMED_THRESHOLD = 100000;
 const SECOND_CONFIRMED_THRESHOLD = 200000;
@@ -185,8 +187,31 @@ export default Vue.extend({
       });
 
       map.on("click", "non-clusters", (e) => {
-        if (e && e.features && e.features[0].properties) {
-          this.$root.$emit("countrySelected", e.features[0].properties.country);
+        if (e && e.features && e.features[0] && e.features[0].properties) {
+          const coordinates = (e.features[0]
+            .geometry as any).coordinates.slice();
+          const properties = e.features[0].properties;
+          const { country, state } = properties;
+          while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+            coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+          }
+          const info = new StateInfo({
+            vuetify: new Vuetify(),
+            propsData: {
+              country,
+              state,
+            },
+          }).$mount();
+          if (info) {
+            new mapboxgl.Popup({
+              closeButton: false,
+              maxWidth: "400px",
+              className: "popup",
+            })
+              .setLngLat(coordinates)
+              .setDOMContent(info.$el)
+              .addTo(map);
+          }
         }
       });
       this.setupMouseEnterAndLeave(map, "clusters");
@@ -213,7 +238,7 @@ export default Vue.extend({
       })
     );
 
-    this.$root.$on("changeDates", (obj: { from: string; to: string }) =>
+    this.$root.$on("mapChangeDates", (obj: { from: string; to: string }) =>
       this.onChangeDates(map, obj)
     );
 

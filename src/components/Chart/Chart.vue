@@ -1,5 +1,5 @@
 <template>
-  <div id="graph" />
+  <div :id="id" />
 </template>
 
 <script src="./Chart.ts"/>

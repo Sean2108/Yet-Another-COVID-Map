@@ -7,7 +7,13 @@ export default Vue.extend({
     this.drawGraph(this.data as Array<CaseCountCapitalised>);
   },
   props: {
+    id: String,
     data: Array,
+    width: Number,
+    height: Number,
+    legendX: Number,
+    legendY: Number,
+    marginHorizontal: Number,
   },
   watch: {
     data: function(newVal) {
@@ -19,28 +25,28 @@ export default Vue.extend({
     drawLegend(svg: any) {
       svg
         .append("circle")
-        .attr("cx", 120)
-        .attr("cy", 0)
+        .attr("cx", this.legendX)
+        .attr("cy", this.legendY)
         .attr("r", 6)
         .style("fill", "steelblue");
       svg
         .append("circle")
-        .attr("cx", 120)
-        .attr("cy", 20)
+        .attr("cx", this.legendX)
+        .attr("cy", this.legendY + 20)
         .attr("r", 6)
         .style("fill", "red");
       svg
         .append("text")
-        .attr("x", 130)
-        .attr("y", 0)
+        .attr("x", this.legendX + 10)
+        .attr("y", this.legendY)
         .text("Confirmed cases")
         .style("font-size", "10px")
         .style("fill", "#fff")
         .attr("alignment-baseline", "middle");
       svg
         .append("text")
-        .attr("x", 130)
-        .attr("y", 20)
+        .attr("x", this.legendX + 10)
+        .attr("y", this.legendY + 20)
         .text("Deaths")
         .style("font-size", "10px")
         .style("fill", "#fff")
@@ -77,11 +83,16 @@ export default Vue.extend({
           deaths: Deaths,
         })
       );
-      const margin = { top: 10, right: 30, bottom: 20, left: 60 },
-        width = 460 - margin.left - margin.right,
-        height = 200 - margin.top - margin.bottom;
+      const margin = {
+          top: 10,
+          right: this.marginHorizontal,
+          bottom: 20,
+          left: this.marginHorizontal,
+        },
+        width = this.width - margin.left - margin.right,
+        height = this.height - margin.top - margin.bottom;
       const svg = d3
-        .select("#graph")
+        .select(`#${this.id}`)
         .append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)

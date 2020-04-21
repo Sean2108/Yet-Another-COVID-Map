@@ -3,7 +3,7 @@ import Vue from "vue";
 import { fetchData } from "../../utils";
 import Chart from "../Chart/Chart.vue";
 import News from "../News/News.vue";
-import { CaseCountCapitalised } from "@/types";
+import { CaseCountCapitalised, NewsItem } from "@/types";
 
 interface ComponentData {
   drawer: boolean;
@@ -14,6 +14,7 @@ interface ComponentData {
   from: string | null;
   to: string | null;
   showConfirmed: boolean;
+  news: Array<NewsItem> | null;
 }
 
 export default Vue.extend({
@@ -29,21 +30,7 @@ export default Vue.extend({
       this.from = this.data[0].Date;
       this.to = this.data[this.max].Date;
     }
-  },
-  mounted() {
-    this.$root.$on("countrySelected", async (country: string) => {
-      this.country = country;
-      const countryData = await fetchData(
-        "cases",
-        "",
-        "",
-        country,
-        true,
-        true,
-        false
-      );
-      this.data = countryData[country].Counts;
-    });
+    this.news = await fetchData("news", "", "", "", false, false, false);
   },
   data(): ComponentData {
     return {
@@ -55,6 +42,7 @@ export default Vue.extend({
       from: null,
       to: null,
       showConfirmed: true,
+      news: null
     };
   },
   computed: {
@@ -72,14 +60,16 @@ export default Vue.extend({
     },
   },
   methods: {
-    updateDates([fromIndex, toIndex]: Array<number>) {
+    updateDates(range: Array<number>) {
       if (!this.data) {
         return;
       }
+      this.range = range;
+      const [ fromIndex, toIndex] = range;
       this.from = this.data[fromIndex].Date;
       this.to = this.data[toIndex].Date;
       _.debounce(() => {
-        this.$root.$emit("changeDates", { from: this.from, to: this.to });
+        this.$root.$emit("mapChangeDates", { from: this.from, to: this.to });
       }, 2000)();
     },
     changeShowConfirmed(showConfirmed: boolean) {
