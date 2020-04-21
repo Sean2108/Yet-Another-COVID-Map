@@ -1,11 +1,6 @@
 import * as mapboxgl from "mapbox-gl";
 import Vue from "vue";
-import {
-  fetchData,
-  convertDataToGeoJson,
-  drawLayer,
-  getMapPaintObj,
-} from "../../utils";
+import { fetchData, convertDataToGeoJson } from "../../utils";
 import { CaseCounts } from "@/types";
 
 const FIRST_CONFIRMED_THRESHOLD = 100000;
@@ -56,7 +51,7 @@ export default Vue.extend({
       (map.getSource("cases") as mapboxgl.GeoJSONSource).setData(
         convertDataToGeoJson(data, getConfirmed) as any
       );
-      let paintObj = getMapPaintObj(true, firstThreshold, secondThreshold);
+      let paintObj = this.getMapPaintObj(true, firstThreshold, secondThreshold);
       map.setPaintProperty(
         "clusters",
         "circle-color",
@@ -67,7 +62,7 @@ export default Vue.extend({
         "circle-radius",
         paintObj["circle-radius"]
       );
-      paintObj = getMapPaintObj(false, firstThreshold, secondThreshold);
+      paintObj = this.getMapPaintObj(false, firstThreshold, secondThreshold);
       map.setPaintProperty(
         "non-clusters",
         "circle-color",
@@ -87,6 +82,61 @@ export default Vue.extend({
         map.getCanvas().style.cursor = "";
       });
     },
+    drawLayer(
+      map: mapboxgl.Map,
+      isCluster: boolean,
+      firstThreshold: number,
+      secondThreshold: number
+    ) {
+      const id = isCluster ? "clusters" : "non-clusters";
+      const filter = isCluster ? ["has", "sum"] : ["!", ["has", "sum"]];
+      map.addLayer({
+        id,
+        type: "circle",
+        source: "cases",
+        filter,
+        paint: this.getMapPaintObj(isCluster, firstThreshold, secondThreshold),
+      });
+
+      map.addLayer({
+        id: `${id}-count`,
+        type: "symbol",
+        source: "cases",
+        filter,
+        layout: {
+          "text-field": isCluster ? "{sum}" : ["get", "value"],
+          "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
+          "text-size": 12,
+        },
+      });
+    },
+    getMapPaintObj(
+      isCluster: boolean,
+      firstThreshold: number,
+      secondThreshold: number
+    ): mapboxgl.CirclePaint {
+      const prop = isCluster ? "sum" : "value";
+      return {
+        "circle-color": [
+          "step",
+          ["get", prop],
+          "#51bbd6",
+          firstThreshold,
+          "#f1f075",
+          secondThreshold,
+          "#f28cb1",
+        ],
+        "circle-radius": [
+          "step",
+          ["get", prop],
+          20,
+          firstThreshold,
+          30,
+          secondThreshold,
+          40,
+        ],
+      };
+    },
     setupMap(map: mapboxgl.Map) {
       const data = this.data;
       if (!data) {
@@ -101,13 +151,13 @@ export default Vue.extend({
         },
       } as any);
 
-      drawLayer(
+      this.drawLayer(
         map,
         true,
         FIRST_CONFIRMED_THRESHOLD,
         SECOND_CONFIRMED_THRESHOLD
       );
-      drawLayer(
+      this.drawLayer(
         map,
         false,
         FIRST_CONFIRMED_THRESHOLD,
