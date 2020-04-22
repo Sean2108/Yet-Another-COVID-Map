@@ -6,8 +6,9 @@ import Vuetify from "vuetify/lib";
 import StateInfo from "../StateInfo/StateInfo.vue";
 
 // below thresholds are expressed as a fraction of the world total between the given dates
-const FIRST_THRESHOLD = 0.05;
-const SECOND_THRESHOLD = 0.2;
+const FIRST_THRESHOLD = 0.01;
+const SECOND_THRESHOLD = 0.1;
+const THIRD_THRESHOLD = 0.3;
 
 const INITIAL_ZOOM = 2;
 const MIN_ZOOM = 1;
@@ -20,6 +21,7 @@ interface ComponentData {
   loading: boolean;
   firstThreshold: number;
   secondThreshold: number;
+  thirdThreshold: number;
 }
 
 export default Vue.extend({
@@ -31,6 +33,7 @@ export default Vue.extend({
       loading: false,
       firstThreshold: 100000,
       secondThreshold: 200000,
+      thirdThreshold: 300000,
     };
   },
   props: {
@@ -48,12 +51,14 @@ export default Vue.extend({
       const globalVal = this.getConfirmed ? confirmed : deaths;
       this.firstThreshold = globalVal * FIRST_THRESHOLD;
       this.secondThreshold = globalVal * SECOND_THRESHOLD;
+      this.thirdThreshold = globalVal * THIRD_THRESHOLD;
     },
     paintThresholds: function(map: mapboxgl.Map) {
       let paintObj = this.getMapPaintObj(
         true,
         this.firstThreshold,
-        this.secondThreshold
+        this.secondThreshold,
+        this.thirdThreshold
       );
       map.setPaintProperty(
         "clusters",
@@ -68,7 +73,8 @@ export default Vue.extend({
       paintObj = this.getMapPaintObj(
         false,
         this.firstThreshold,
-        this.secondThreshold
+        this.secondThreshold,
+        this.thirdThreshold
       );
       map.setPaintProperty(
         "non-clusters",
@@ -121,12 +127,7 @@ export default Vue.extend({
         map.getCanvas().style.cursor = "";
       });
     },
-    drawLayer(
-      map: mapboxgl.Map,
-      isCluster: boolean,
-      firstThreshold: number,
-      secondThreshold: number
-    ) {
+    drawLayer(map: mapboxgl.Map, isCluster: boolean) {
       const id = isCluster ? "clusters" : "non-clusters";
       const filter = isCluster ? ["has", "sum"] : ["!", ["has", "sum"]];
       map.addLayer({
@@ -134,7 +135,12 @@ export default Vue.extend({
         type: "circle",
         source: "cases",
         filter,
-        paint: this.getMapPaintObj(isCluster, firstThreshold, secondThreshold),
+        paint: this.getMapPaintObj(
+          isCluster,
+          this.firstThreshold,
+          this.secondThreshold,
+          this.thirdThreshold
+        ),
       });
 
       map.addLayer({
@@ -152,26 +158,35 @@ export default Vue.extend({
     getMapPaintObj(
       isCluster: boolean,
       firstThreshold: number,
-      secondThreshold: number
+      secondThreshold: number,
+      thirdThreshold: number
     ): mapboxgl.CirclePaint {
       const prop = isCluster ? "sum" : "value";
       return {
         "circle-color": [
-          "step",
+          "interpolate",
+          ["linear"],
           ["get", prop],
-          "#51bbd6",
+          0,
+          "#33FF73",
           firstThreshold,
-          "#f1f075",
+          "#51bbd6",
           secondThreshold,
+          "#f1f075",
+          thirdThreshold,
           "#f28cb1",
         ],
         "circle-radius": [
-          "step",
+          "interpolate",
+          ["linear"],
           ["get", prop],
-          20,
+          0,
+          15,
           firstThreshold,
-          30,
+          20,
           secondThreshold,
+          30,
+          thirdThreshold,
           40,
         ],
       };
@@ -190,8 +205,8 @@ export default Vue.extend({
         },
       } as any);
 
-      this.drawLayer(map, true, this.firstThreshold, this.secondThreshold);
-      this.drawLayer(map, false, this.firstThreshold, this.secondThreshold);
+      this.drawLayer(map, true);
+      this.drawLayer(map, false);
 
       map.on("click", "clusters", function(e: any) {
         const features = map.queryRenderedFeatures(e.point, {
