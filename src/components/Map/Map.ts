@@ -1,15 +1,13 @@
 import * as mapboxgl from "mapbox-gl";
 import Vue from "vue";
 import { fetchData, convertDataToGeoJson } from "../../utils";
-import { CaseCounts } from "@/types";
+import { CaseCounts, CaseCountCapitalised } from "@/types";
 import Vuetify from "vuetify/lib";
 import StateInfo from "../StateInfo/StateInfo.vue";
 
-const FIRST_CONFIRMED_THRESHOLD = 100000;
-const SECOND_CONFIRMED_THRESHOLD = 200000;
-
-const FIRST_DEATHS_THRESHOLD = 10000;
-const SECOND_DEATHS_THRESHOLD = 20000;
+// below thresholds are expressed as a fraction of the world total between the given dates
+const FIRST_THRESHOLD = 0.05;
+const SECOND_THRESHOLD = 0.2;
 
 const INITIAL_ZOOM = 2;
 const MIN_ZOOM = 1;
@@ -18,6 +16,9 @@ const MAX_ZOOM = 7;
 interface ComponentData {
   data: CaseCounts | null;
   getConfirmed: boolean;
+  range: Array<number>;
+  firstThreshold: number;
+  secondThreshold: number;
 }
 
 export default Vue.extend({
@@ -25,26 +26,73 @@ export default Vue.extend({
     return {
       data: null,
       getConfirmed: true,
+      range: [0, 0],
+      firstThreshold: 100000,
+      secondThreshold: 200000,
     };
   },
+  props: {
+    worldData: Array,
+  },
   methods: {
+    setThresholds: function(
+      data: Array<CaseCountCapitalised>,
+      range: Array<number>
+    ) {
+      const [from, to] = range;
+      const confirmed =
+        data[to].Confirmed - (from > 0 ? data[from - 1].Confirmed : 0);
+      const deaths = data[to].Deaths - (from > 0 ? data[from - 1].Deaths : 0);
+      const globalVal = this.getConfirmed ? confirmed : deaths;
+      this.firstThreshold = globalVal * FIRST_THRESHOLD;
+      this.secondThreshold = globalVal * SECOND_THRESHOLD;
+    },
+    paintThresholds: function(map: mapboxgl.Map) {
+      let paintObj = this.getMapPaintObj(
+        true,
+        this.firstThreshold,
+        this.secondThreshold
+      );
+      map.setPaintProperty(
+        "clusters",
+        "circle-color",
+        paintObj["circle-color"]
+      );
+      map.setPaintProperty(
+        "clusters",
+        "circle-radius",
+        paintObj["circle-radius"]
+      );
+      paintObj = this.getMapPaintObj(
+        false,
+        this.firstThreshold,
+        this.secondThreshold
+      );
+      map.setPaintProperty(
+        "non-clusters",
+        "circle-color",
+        paintObj["circle-color"]
+      );
+      map.setPaintProperty(
+        "non-clusters",
+        "circle-radius",
+        paintObj["circle-radius"]
+      );
+    },
     onChangeDates: async function(
       map: mapboxgl.Map,
-      { from, to }: { from: string; to: string }
+      { from, to, range }: { from: string; to: string; range: Array<number> }
     ) {
+      this.range = range;
+      this.setThresholds(this.worldData as Array<CaseCountCapitalised>, range);
       const data = await fetchData("cases", from, to, "", false, false, false);
       this.data = data;
       (map.getSource("cases") as mapboxgl.GeoJSONSource).setData(
         convertDataToGeoJson(data, this.getConfirmed) as any
       );
+      this.paintThresholds(map);
     },
     onChangeShowConfirmed: function(map: mapboxgl.Map, getConfirmed: boolean) {
-      const firstThreshold = getConfirmed
-        ? FIRST_CONFIRMED_THRESHOLD
-        : FIRST_DEATHS_THRESHOLD;
-      const secondThreshold = getConfirmed
-        ? SECOND_CONFIRMED_THRESHOLD
-        : SECOND_DEATHS_THRESHOLD;
       this.getConfirmed = getConfirmed;
       const data = this.data;
       if (!data) {
@@ -53,28 +101,11 @@ export default Vue.extend({
       (map.getSource("cases") as mapboxgl.GeoJSONSource).setData(
         convertDataToGeoJson(data, getConfirmed) as any
       );
-      let paintObj = this.getMapPaintObj(true, firstThreshold, secondThreshold);
-      map.setPaintProperty(
-        "clusters",
-        "circle-color",
-        paintObj["circle-color"]
+      this.setThresholds(
+        this.worldData as Array<CaseCountCapitalised>,
+        this.range
       );
-      map.setPaintProperty(
-        "clusters",
-        "circle-radius",
-        paintObj["circle-radius"]
-      );
-      paintObj = this.getMapPaintObj(false, firstThreshold, secondThreshold);
-      map.setPaintProperty(
-        "non-clusters",
-        "circle-color",
-        paintObj["circle-color"]
-      );
-      map.setPaintProperty(
-        "non-clusters",
-        "circle-radius",
-        paintObj["circle-radius"]
-      );
+      this.paintThresholds(map);
     },
     setupMouseEnterAndLeave(map: mapboxgl.Map, layerName: string) {
       map.on("mouseenter", layerName, function() {
@@ -153,18 +184,8 @@ export default Vue.extend({
         },
       } as any);
 
-      this.drawLayer(
-        map,
-        true,
-        FIRST_CONFIRMED_THRESHOLD,
-        SECOND_CONFIRMED_THRESHOLD
-      );
-      this.drawLayer(
-        map,
-        false,
-        FIRST_CONFIRMED_THRESHOLD,
-        SECOND_CONFIRMED_THRESHOLD
-      );
+      this.drawLayer(map, true, this.firstThreshold, this.secondThreshold);
+      this.drawLayer(map, false, this.firstThreshold, this.secondThreshold);
 
       map.on("click", "clusters", function(e: any) {
         const features = map.queryRenderedFeatures(e.point, {
@@ -219,6 +240,10 @@ export default Vue.extend({
     },
   },
   async mounted() {
+    this.setThresholds(this.worldData as Array<CaseCountCapitalised>, [
+      0,
+      this.worldData.length - 1,
+    ]);
     this.data = await fetchData("cases", "", "", "", false, false, false);
     (mapboxgl as any).accessToken = process.env.VUE_APP_MAPBOX_ACCESS_TOKEN;
     const map = new mapboxgl.Map({
@@ -238,8 +263,10 @@ export default Vue.extend({
       })
     );
 
-    this.$root.$on("changeDates", (obj: { from: string; to: string }) =>
-      this.onChangeDates(map, obj)
+    this.$root.$on(
+      "changeDates",
+      (obj: { from: string; to: string; range: Array<number> }) =>
+        this.onChangeDates(map, obj)
     );
 
     this.$root.$on("changeShowConfirmed", (getConfirmed: boolean) =>

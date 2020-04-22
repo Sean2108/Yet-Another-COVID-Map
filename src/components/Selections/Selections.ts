@@ -24,10 +24,11 @@ export default Vue.extend({
   methods: {
     updateDates(range: Array<number>) {
       const data = this.data as Array<CaseCountCapitalised>;
-      this.$root.$emit("changeDateRange", this.range);
+      this.$root.$emit("changeDateRange", range);
       const [from, to] = this.range;
       _.debounce(() => {
         this.$root.$emit("changeDates", {
+          range,
           from: data[from].Date,
           to: data[to].Date,
         });

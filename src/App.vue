@@ -2,7 +2,7 @@
   <v-app>
     <v-content>
       <v-container>
-        <Map />
+        <Map v-if="data" :worldData="data" />
         <Drawer v-if="data" :data="data" />
         <Selections v-if="data" :data="data" />
       </v-container>
