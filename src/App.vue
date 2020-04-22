@@ -29,8 +29,10 @@ export default Vue.extend({
   data: () => ({
     data: null,
   }),
-  async created() {
-    this.data = await fetchData("cases", "", "", "", false, false, true);
+  created() {
+    fetchData("cases", "", "", "", false, false, true).then(
+      (response) => (this.data = response)
+    );
   },
 });
 </script>

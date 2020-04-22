@@ -47,3 +47,10 @@ export interface NewsItem {
     ThumbnailURL: string;
     PublishedAt: string;
 }
+
+export interface CaseCountAggregated {
+  Lat: number;
+  Long: number;
+  Confirmed: number;
+  Deaths: number;
+}

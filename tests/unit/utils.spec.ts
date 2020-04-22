@@ -1,4 +1,4 @@
-import { convertDataToGeoJson } from "../../src/utils";
+import { convertDataToGeoJson, getTopKSorted } from "../../src/utils";
 
 describe("convertDataToGeoJson function", () => {
   it("should work correctly for confirmed cases", () => {
@@ -183,5 +183,47 @@ describe("convertDataToGeoJson function", () => {
       },
     ];
     expect(result.features).toEqual(expectedFeatures);
+  });
+});
+
+describe("getTopKSorted function", () => {
+  const parameters = [
+    {
+      description: "should behave correctly when list has >k elements",
+      input: [2, 6, 8, 4, 4, 1, -1],
+      k: 4,
+      expected: [4, 4, 6, 8],
+    },
+    {
+      description: "should behave correctly when list has =k elements",
+      input: [2, 6, 8, 4, 4, 1, 0, -1],
+      k: 1,
+      expected: [8],
+    },
+    {
+      description: "should return empty list when list has <k elements",
+      input: [8, 4, 1],
+      k: 4,
+      expected: [],
+    },
+    {
+      description: "should return empty list when k is negative",
+      input: [8, 4, 1],
+      k: -1,
+      expected: [],
+    },
+    {
+      description: "should return empty list for empty list",
+      input: [],
+      k: 4,
+      expected: [],
+    },
+  ];
+  parameters.forEach(({ description, input, k, expected }) => {
+    it(description, () => {
+      expect(
+        getTopKSorted(input, k, (a, b) => (a < b ? -1 : a > b ? 1 : 0))
+      ).toEqual(expected);
+    });
   });
 });
