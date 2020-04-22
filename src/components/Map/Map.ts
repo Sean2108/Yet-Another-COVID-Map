@@ -59,39 +59,28 @@ export default Vue.extend({
       this.secondThreshold = globalVal * SECOND_THRESHOLD;
       this.thirdThreshold = globalVal * THIRD_THRESHOLD;
     },
+    paintThreshold: function(map: mapboxgl.Map, isCluster: boolean) {
+      const id = `${isCluster ? "" : "non-"}clusters`;
+      const paintObj = this.getMapPaintObj(
+        isCluster,
+        this.firstThreshold,
+        this.secondThreshold,
+        this.thirdThreshold
+      );
+      map.setPaintProperty(
+        id,
+        "circle-color",
+        paintObj["circle-color"]
+      );
+      map.setPaintProperty(
+        id,
+        "circle-radius",
+        paintObj["circle-radius"]
+      );
+    },
     paintThresholds: function(map: mapboxgl.Map) {
-      let paintObj = this.getMapPaintObj(
-        true,
-        this.firstThreshold,
-        this.secondThreshold,
-        this.thirdThreshold
-      );
-      map.setPaintProperty(
-        "clusters",
-        "circle-color",
-        paintObj["circle-color"]
-      );
-      map.setPaintProperty(
-        "clusters",
-        "circle-radius",
-        paintObj["circle-radius"]
-      );
-      paintObj = this.getMapPaintObj(
-        false,
-        this.firstThreshold,
-        this.secondThreshold,
-        this.thirdThreshold
-      );
-      map.setPaintProperty(
-        "non-clusters",
-        "circle-color",
-        paintObj["circle-color"]
-      );
-      map.setPaintProperty(
-        "non-clusters",
-        "circle-radius",
-        paintObj["circle-radius"]
-      );
+      this.paintThreshold(map, true);
+      this.paintThreshold(map, false);
     },
     onChangeDates: async function(
       map: mapboxgl.Map,
