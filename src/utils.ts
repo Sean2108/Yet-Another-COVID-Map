@@ -19,7 +19,7 @@ export async function fetchData(
     `https://yet-another-covid-api.herokuapp.com/${endpoint}?from=${from}&to=${to}&country=${country}&aggregatecountries=${aggregateCountries}&perday=${perDay}&worldtotal=${worldTotal}`
   );
   if (response.status !== 200) {
-    return null;
+    return worldTotal ? [] : {};
   }
   return await response.json();
 }
@@ -33,7 +33,7 @@ export function convertDataToGeoJson(
       Object.entries(stateInfo).map(
         ([
           state,
-          { Lat: lat, Long: long, Confirmed: confirmed, Deaths: deaths },
+          { lat, long, confirmed, deaths },
         ]): GeoJsonFeature => ({
           type: "Feature",
           properties: {
@@ -127,12 +127,12 @@ export function compareByCases(
   a: CaseCountAggregated,
   b: CaseCountAggregated
 ): number {
-  return a.Confirmed < b.Confirmed ? -1 : a.Confirmed > b.Confirmed ? 1 : 0;
+  return a.confirmed < b.confirmed ? -1 : a.confirmed > b.confirmed ? 1 : 0;
 }
 
 export function compareByDeaths(
   a: CaseCountAggregated,
   b: CaseCountAggregated
 ): number {
-  return a.Deaths < b.Deaths ? -1 : a.Deaths > b.Deaths ? 1 : 0;
+  return a.deaths < b.deaths ? -1 : a.deaths > b.deaths ? 1 : 0;
 }

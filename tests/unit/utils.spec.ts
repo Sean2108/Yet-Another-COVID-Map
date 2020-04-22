@@ -5,40 +5,40 @@ describe("convertDataToGeoJson function", () => {
     const data = {
       Afghanistan: {
         "": {
-          Lat: 33,
-          Long: 65,
-          Confirmed: 996,
-          Deaths: 33,
+          lat: 33,
+          long: 65,
+          confirmed: 996,
+          deaths: 33,
         },
       },
       Albania: {
         "": {
-          Lat: 41.1533,
-          Long: 20.1683,
-          Confirmed: 562,
-          Deaths: 26,
+          lat: 41.1533,
+          long: 20.1683,
+          confirmed: 562,
+          deaths: 26,
         },
       },
       Algeria: {
         "": {
-          Lat: 28.0339,
-          Long: 1.6596,
-          Confirmed: 2629,
-          Deaths: 375,
+          lat: 28.0339,
+          long: 1.6596,
+          confirmed: 2629,
+          deaths: 375,
         },
       },
       Australia: {
         "New South Wales": {
-          Lat: -33.8688,
-          Long: 151.2093,
-          Confirmed: 2926,
-          Deaths: 26,
+          lat: -33.8688,
+          long: 151.2093,
+          confirmed: 2926,
+          deaths: 26,
         },
         "Northern Territory": {
-          Lat: -12.4634,
-          Long: 130.8456,
-          Confirmed: 28,
-          Deaths: 0,
+          lat: -12.4634,
+          long: 130.8456,
+          confirmed: 28,
+          deaths: 0,
         },
       },
     };
@@ -97,40 +97,40 @@ describe("convertDataToGeoJson function", () => {
     const data = {
       Afghanistan: {
         "": {
-          Lat: 33,
-          Long: 65,
-          Confirmed: 996,
-          Deaths: 33,
+          lat: 33,
+          long: 65,
+          confirmed: 996,
+          deaths: 33,
         },
       },
       Albania: {
         "": {
-          Lat: 41.1533,
-          Long: 20.1683,
-          Confirmed: 562,
-          Deaths: 26,
+          lat: 41.1533,
+          long: 20.1683,
+          confirmed: 562,
+          deaths: 26,
         },
       },
       Algeria: {
         "": {
-          Lat: 28.0339,
-          Long: 1.6596,
-          Confirmed: 2629,
-          Deaths: 375,
+          lat: 28.0339,
+          long: 1.6596,
+          confirmed: 2629,
+          deaths: 375,
         },
       },
       Australia: {
         "New South Wales": {
-          Lat: -33.8688,
-          Long: 151.2093,
-          Confirmed: 2926,
-          Deaths: 26,
+          lat: -33.8688,
+          long: 151.2093,
+          confirmed: 2926,
+          deaths: 26,
         },
         "Northern Territory": {
-          Lat: -12.4634,
-          Long: 130.8456,
-          Confirmed: 28,
-          Deaths: 0,
+          lat: -12.4634,
+          long: 130.8456,
+          confirmed: 28,
+          deaths: 0,
         },
       },
     };

@@ -1,11 +1,6 @@
 export interface CaseCounts {
   [country: string]: {
-    [state: string]: {
-      Lat: number;
-      Long: number;
-      Confirmed: number;
-      Deaths: number;
-    };
+    [state: string]: CaseCountAggregated;
   };
 }
 
@@ -27,30 +22,29 @@ export interface GeoJsonFeature {
   };
 }
 
-export interface CaseCountCapitalised {
-  Date: string;
-  Confirmed: number;
-  Deaths: number;
-}
-
-export interface CaseCount {
-  date: Date | null;
+interface Statistics {
   confirmed: number;
   deaths: number;
 }
 
-export interface NewsItem {
-    Source: string;
-    Title: string;
-    Description: string;
-    URL: string;
-    ThumbnailURL: string;
-    PublishedAt: string;
+export interface CaseCountRaw extends Statistics {
+  date: string;
 }
 
-export interface CaseCountAggregated {
-  Lat: number;
-  Long: number;
-  Confirmed: number;
-  Deaths: number;
+export interface CaseCount extends Statistics {
+  date: Date | null;
+}
+
+export interface NewsItem {
+    source: string;
+    title: string;
+    description: string;
+    url: string;
+    thumbnailUrl: string;
+    publishedAt: string;
+}
+
+export interface CaseCountAggregated extends Statistics {
+  lat: number;
+  long: number;
 }

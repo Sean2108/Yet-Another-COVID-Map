@@ -1,10 +1,10 @@
 import * as d3 from "d3";
 import Vue from "vue";
-import { CaseCountCapitalised, CaseCount } from "@/types";
+import { CaseCountRaw, CaseCount } from "@/types";
 
 export default Vue.extend({
   mounted() {
-    this.drawGraph(this.data as Array<CaseCountCapitalised>);
+    this.drawGraph(this.data as Array<CaseCountRaw>);
   },
   props: {
     id: String,
@@ -75,12 +75,12 @@ export default Vue.extend({
             .y(getYFunc)
         );
     },
-    drawGraph(input: Array<CaseCountCapitalised>) {
+    drawGraph(input: Array<CaseCountRaw>) {
       const data: Array<CaseCount> = input.map(
-        ({ Date: d, Confirmed, Deaths }) => ({
-          date: d3.timeParse("%-m/%-d/%y")(d),
-          confirmed: Confirmed,
-          deaths: Deaths,
+        ({ date, confirmed, deaths }) => ({
+          date: d3.timeParse("%-m/%-d/%y")(date),
+          confirmed: confirmed,
+          deaths: deaths,
         })
       );
       const margin = {

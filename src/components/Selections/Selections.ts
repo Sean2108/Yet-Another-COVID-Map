@@ -1,6 +1,6 @@
 import Vue from "vue";
 import _ from "lodash";
-import { CaseCountCapitalised } from "@/types";
+import { CaseCountRaw } from "@/types";
 
 interface ComponentData {
   range: Array<number>;
@@ -24,11 +24,11 @@ export default Vue.extend({
   methods: {
     debouncedEmitChangeDates: _.debounce(function(this: any) {
       const [from, to] = this.range;
-      const data = this.data as Array<CaseCountCapitalised>;
+      const data = this.data as Array<CaseCountRaw>;
       this.$root.$emit("changeDates", {
         range: this.range,
-        from: data[from].Date,
-        to: data[to].Date,
+        from: data[from].date,
+        to: data[to].date,
       });
     }, 1000),
     updateDates(range: Array<number>) {
@@ -42,14 +42,14 @@ export default Vue.extend({
   },
   computed: {
     from() {
-      const data = this.data as Array<CaseCountCapitalised>;
+      const data = this.data as Array<CaseCountRaw>;
       const [from] = this.range;
-      return data[from].Date;
+      return data[from].date;
     },
     to() {
-      const data = this.data as Array<CaseCountCapitalised>;
+      const data = this.data as Array<CaseCountRaw>;
       const [, to] = this.range;
-      return data[to].Date;
+      return data[to].date;
     },
   },
 });

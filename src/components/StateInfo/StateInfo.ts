@@ -2,15 +2,15 @@ import Vue from "vue";
 import News from "../News/News.vue";
 import Chart from "../Chart/Chart.vue";
 import { fetchData } from "../../utils";
-import { CaseCountCapitalised, NewsItem } from "@/types";
+import { NewsItem, CaseCountRaw } from "@/types";
 import Vuetify from "vuetify";
 
 Vue.use(Vuetify);
 
 interface ComponentData {
-  stateData: Array<CaseCountCapitalised> | null;
-  countryData: Array<CaseCountCapitalised> | null;
-  news: Array<NewsItem> | null;
+  stateData: Array<CaseCountRaw>;
+  countryData: Array<CaseCountRaw>;
+  news: Array<NewsItem>;
 }
 
 export default Vue.extend({
@@ -20,9 +20,9 @@ export default Vue.extend({
   },
   data(): ComponentData {
     return {
-      stateData: null,
-      countryData: null,
-      news: null,
+      stateData: [],
+      countryData: [],
+      news: [],
     };
   },
   props: { country: String, state: String },
@@ -30,11 +30,11 @@ export default Vue.extend({
     if (this.state) {
       fetchData("cases", "", "", this.country, false, true, false).then(
         (response) =>
-          (this.stateData = response[this.country][this.state].Counts)
+          (this.stateData = response[this.country][this.state].counts)
       );
     }
     fetchData("cases", "", "", this.country, true, true, false).then(
-      (response) => (this.countryData = response[this.country].Counts)
+      (response) => (this.countryData = response[this.country].counts)
     );
 
     fetchData("news", "", "", this.country, false, false, false).then(
@@ -42,30 +42,30 @@ export default Vue.extend({
     );
   },
   computed: {
-    getStateConfirmed: function() {
-      const data = this.stateData as Array<CaseCountCapitalised> | null;
-      return data ? data[data.length - 1].Confirmed : "Unknown";
+    getStateConfirmed: function(): number | string {
+      return this.getStats(this.stateData, true);
     },
-    getStateDeaths: function() {
-      const data = this.stateData as Array<CaseCountCapitalised> | null;
-      return data ? data[data.length - 1].Deaths : "Unknown";
+    getStateDeaths: function(): number | string {
+      return this.getStats(this.stateData, false);
     },
-    getCountryConfirmed: function() {
-      const data = this.countryData as Array<CaseCountCapitalised> | null;
-      return data ? data[data.length - 1].Confirmed : "Unknown";
+    getCountryConfirmed: function(): number | string {
+      return this.getStats(this.countryData, true);
     },
-    getCountryDeaths: function() {
-      const data = this.countryData as Array<CaseCountCapitalised> | null;
-      return data ? data[data.length - 1].Deaths : "Unknown";
-    },
-    hasNews: function() {
-      const news = this.news as Array<NewsItem> | null;
-      return news && news.length;
+    getCountryDeaths: function(): number | string {
+      return this.getStats(this.countryData, false);
     },
   },
   methods: {
     getHeader: function() {
       return this.state ? `${this.state} (${this.country})` : this.country;
+    },
+    getStats: function(
+      data: Array<CaseCountRaw>,
+      getConfirmed: boolean
+    ): number | string {
+      return data.length
+        ? data[data.length - 1][getConfirmed ? "confirmed" : "deaths"]
+        : "Unknown";
     },
   },
 });

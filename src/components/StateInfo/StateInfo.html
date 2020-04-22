@@ -1,7 +1,7 @@
 <v-expansion-panels accordion focusable dark>
   <v-subheader light>{{getHeader()}}</v-subheader>
 
-  <v-expansion-panel v-if="stateData">
+  <v-expansion-panel v-if="stateData.length">
     <v-expansion-panel-header disable-icon-rotate expand-icon="mdi-counter">
       Statistics (State)</v-expansion-panel-header
     >
@@ -16,7 +16,7 @@
     </v-expansion-panel-content>
   </v-expansion-panel>
 
-  <v-expansion-panel v-if="countryData">
+  <v-expansion-panel v-if="countryData.length">
     <v-expansion-panel-header disable-icon-rotate expand-icon="mdi-counter">
       {{state ? "Statistics (Country)" :
       "Statistics"}}</v-expansion-panel-header
@@ -32,7 +32,7 @@
     </v-expansion-panel-content>
   </v-expansion-panel>
 
-  <v-expansion-panel v-if="stateData">
+  <v-expansion-panel v-if="stateData.length">
     <v-expansion-panel-header disable-icon-rotate expand-icon="mdi-chart-line">
       History (State)</v-expansion-panel-header
     >
@@ -49,7 +49,7 @@
     </v-expansion-panel-content>
   </v-expansion-panel>
 
-  <v-expansion-panel v-if="countryData">
+  <v-expansion-panel v-if="countryData.length">
     <v-expansion-panel-header disable-icon-rotate expand-icon="mdi-chart-line">
       {{state ? "History (Country)" : "History"}}</v-expansion-panel-header
     >
@@ -66,7 +66,7 @@
     </v-expansion-panel-content>
   </v-expansion-panel>
 
-  <v-expansion-panel v-if="hasNews">
+  <v-expansion-panel v-if="news.length">
     <v-expansion-panel-header
       disable-icon-rotate
       expand-icon="mdi-newspaper-variant"

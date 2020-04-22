@@ -2,9 +2,9 @@
   <v-app>
     <v-content>
       <v-container>
-        <Map v-if="data" :worldData="data" />
-        <Drawer v-if="data" :data="data" />
-        <Selections v-if="data" :data="data" />
+        <Map v-if="data.length" :worldData="data" />
+        <Drawer v-if="data.length" :data="data" />
+        <Selections v-if="data.length" :data="data" />
       </v-container>
     </v-content>
   </v-app>
@@ -27,7 +27,7 @@ export default Vue.extend({
   },
 
   data: () => ({
-    data: null,
+    data: [],
   }),
   created() {
     fetchData("cases", "", "", "", false, false, true).then(

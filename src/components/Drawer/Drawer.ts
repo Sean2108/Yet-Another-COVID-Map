@@ -2,11 +2,11 @@ import Vue from "vue";
 import { fetchData } from "../../utils";
 import Chart from "../Chart/Chart.vue";
 import News from "../News/News.vue";
-import { CaseCountCapitalised, NewsItem } from "@/types";
+import { CaseCountRaw, NewsItem } from "@/types";
 
 interface ComponentData {
   drawer: boolean;
-  news: Array<NewsItem> | null;
+  news: Array<NewsItem>;
   range: Array<number>;
 }
 
@@ -21,7 +21,7 @@ export default Vue.extend({
   data(): ComponentData {
     return {
       drawer: true,
-      news: null,
+      news: [],
       range: [0, 0],
     };
   },
@@ -40,13 +40,13 @@ export default Vue.extend({
   computed: {
     getConfirmed: function() {
       const [from, to] = this.range as Array<number>;
-      const data = this.data as Array<CaseCountCapitalised>;
-      return data[to].Confirmed - (from === 0 ? 0 : data[from].Confirmed);
+      const data = this.data as Array<CaseCountRaw>;
+      return data[to].confirmed - (from === 0 ? 0 : data[from].confirmed);
     },
     getDeaths: function() {
       const [from, to] = this.range as Array<number>;
-      const data = this.data as Array<CaseCountCapitalised>;
-      return data[to].Deaths - (from === 0 ? 0 : data[from].Deaths);
+      const data = this.data as Array<CaseCountRaw>;
+      return data[to].deaths - (from === 0 ? 0 : data[from].deaths);
     },
   },
 });

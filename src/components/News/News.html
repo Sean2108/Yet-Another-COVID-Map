@@ -5,22 +5,22 @@
   dense
   tile
 >
-  <v-tooltip bottom dark v-for="newsItem in news" :key="newsItem.Title">
+  <v-tooltip bottom dark v-for="newsItem in news" :key="newsItem.title">
     <template v-slot:activator="{ on }">
-      <v-card v-on="on" class="news-card" :href="newsItem.URL">
+      <v-card v-on="on" class="news-card" :href="newsItem.url">
         <v-list-item>
           <v-list-item-avatar>
-            <v-img :src="newsItem.ThumbnailURL" alt="" />
+            <v-img :src="newsItem.thumbnailUrl" alt="" />
           </v-list-item-avatar>
           <v-list-item-content>
-            <v-list-item-title>{{ newsItem.Title }}</v-list-item-title>
+            <v-list-item-title>{{ newsItem.title }}</v-list-item-title>
             <v-list-item-subtitle
-              >{{ newsItem.Description }}</v-list-item-subtitle
+              >{{ newsItem.description }}</v-list-item-subtitle
             >
           </v-list-item-content>
         </v-list-item>
       </v-card>
     </template>
-    <span>{{ newsItem.Title }}</span>
+    <span>{{ newsItem.title }}</span>
   </v-tooltip>
 </v-list>

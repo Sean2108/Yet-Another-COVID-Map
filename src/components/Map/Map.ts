@@ -1,7 +1,7 @@
 import * as mapboxgl from "mapbox-gl";
 import Vue from "vue";
 import { fetchData, convertDataToGeoJson } from "../../utils";
-import { CaseCounts, CaseCountCapitalised } from "@/types";
+import { CaseCounts, CaseCountRaw } from "@/types";
 import Vuetify from "vuetify/lib";
 import StateInfo from "../StateInfo/StateInfo.vue";
 
@@ -15,7 +15,7 @@ const MIN_ZOOM = 1;
 const MAX_ZOOM = 7;
 
 interface ComponentData {
-  data: CaseCounts | null;
+  data: CaseCounts;
   getConfirmed: boolean;
   range: Array<number>;
   loading: boolean;
@@ -27,7 +27,7 @@ interface ComponentData {
 export default Vue.extend({
   data(): ComponentData {
     return {
-      data: null,
+      data: {},
       getConfirmed: true,
       range: [0, 0],
       loading: false,
@@ -40,14 +40,11 @@ export default Vue.extend({
     worldData: Array,
   },
   methods: {
-    setThresholds: function(
-      data: Array<CaseCountCapitalised>,
-      range: Array<number>
-    ) {
+    setThresholds: function(data: Array<CaseCountRaw>, range: Array<number>) {
       const [from, to] = range;
       const confirmed =
-        data[to].Confirmed - (from > 0 ? data[from - 1].Confirmed : 0);
-      const deaths = data[to].Deaths - (from > 0 ? data[from - 1].Deaths : 0);
+        data[to].confirmed - (from > 0 ? data[from - 1].confirmed : 0);
+      const deaths = data[to].deaths - (from > 0 ? data[from - 1].deaths : 0);
       const globalVal = this.getConfirmed ? confirmed : deaths;
       this.firstThreshold = globalVal * FIRST_THRESHOLD;
       this.secondThreshold = globalVal * SECOND_THRESHOLD;
@@ -93,7 +90,7 @@ export default Vue.extend({
     ) {
       this.loading = true;
       this.range = range;
-      this.setThresholds(this.worldData as Array<CaseCountCapitalised>, range);
+      this.setThresholds(this.worldData as Array<CaseCountRaw>, range);
       const data = await fetchData("cases", from, to, "", false, false, false);
       this.data = data;
       (map.getSource("cases") as mapboxgl.GeoJSONSource).setData(
@@ -112,10 +109,7 @@ export default Vue.extend({
       (map.getSource("cases") as mapboxgl.GeoJSONSource).setData(
         convertDataToGeoJson(data, getConfirmed) as any
       );
-      this.setThresholds(
-        this.worldData as Array<CaseCountCapitalised>,
-        this.range
-      );
+      this.setThresholds(this.worldData as Array<CaseCountRaw>, this.range);
       this.paintThresholds(map);
       this.loading = false;
     },
@@ -198,7 +192,7 @@ export default Vue.extend({
       }
       map.addSource("cases", {
         type: "geojson",
-        data: convertDataToGeoJson(data, true) as any,
+        data: convertDataToGeoJson(data, true),
         cluster: true,
         clusterProperties: {
           sum: ["+", ["get", "value"]],
@@ -262,7 +256,7 @@ export default Vue.extend({
   },
   async mounted() {
     this.loading = true;
-    this.setThresholds(this.worldData as Array<CaseCountCapitalised>, [
+    this.setThresholds(this.worldData as Array<CaseCountRaw>, [
       0,
       this.worldData.length - 1,
     ]);
