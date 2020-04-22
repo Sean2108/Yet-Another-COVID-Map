@@ -1,7 +1,7 @@
 import * as mapboxgl from "mapbox-gl";
 import Vue from "vue";
 import { fetchData, convertDataToGeoJson } from "../../utils";
-import { CaseCounts, CaseCountRaw } from "@/types";
+import { CaseCounts, CaseCountRaw, DataTypes } from "@/types";
 import Vuetify from "vuetify/lib";
 import StateInfo from "../StateInfo/StateInfo.vue";
 
@@ -16,7 +16,7 @@ const MAX_ZOOM = 7;
 
 interface ComponentData {
   data: CaseCounts;
-  getConfirmed: boolean;
+  type: DataTypes;
   range: Array<number>;
   loading: boolean;
   firstThreshold: number;
@@ -28,7 +28,7 @@ export default Vue.extend({
   data(): ComponentData {
     return {
       data: {},
-      getConfirmed: true,
+      type: DataTypes.CONFIRMED,
       range: [0, 0],
       loading: false,
       firstThreshold: 100000,
@@ -40,12 +40,21 @@ export default Vue.extend({
     worldData: Array,
   },
   methods: {
-    setThresholds: function(data: Array<CaseCountRaw>, range: Array<number>) {
-      const [from, to] = range;
+    setThresholds: function(
+      data: Array<CaseCountRaw>,
+      [from, to]: Array<number>
+    ) {
       const confirmed =
         data[to].confirmed - (from > 0 ? data[from - 1].confirmed : 0);
       const deaths = data[to].deaths - (from > 0 ? data[from - 1].deaths : 0);
-      const globalVal = this.getConfirmed ? confirmed : deaths;
+      const recovered =
+        data[to].recovered - (from > 0 ? data[from - 1].recovered : 0);
+      const globalVal =
+        this.type === DataTypes.CONFIRMED
+          ? confirmed
+          : this.type === DataTypes.DEATHS
+          ? deaths
+          : recovered;
       this.firstThreshold = globalVal * FIRST_THRESHOLD;
       this.secondThreshold = globalVal * SECOND_THRESHOLD;
       this.thirdThreshold = globalVal * THIRD_THRESHOLD;
@@ -94,20 +103,20 @@ export default Vue.extend({
       const data = await fetchData("cases", from, to, "", false, false, false);
       this.data = data;
       (map.getSource("cases") as mapboxgl.GeoJSONSource).setData(
-        convertDataToGeoJson(data, this.getConfirmed) as any
+        convertDataToGeoJson(data, this.type) as any
       );
       this.paintThresholds(map);
       this.loading = false;
     },
-    onChangeShowConfirmed: function(map: mapboxgl.Map, getConfirmed: boolean) {
+    onChangeType: function(map: mapboxgl.Map, type: DataTypes) {
       this.loading = true;
-      this.getConfirmed = getConfirmed;
+      this.type = type;
       const data = this.data;
       if (!data) {
         return;
       }
       (map.getSource("cases") as mapboxgl.GeoJSONSource).setData(
-        convertDataToGeoJson(data, getConfirmed) as any
+        convertDataToGeoJson(data, type) as any
       );
       this.setThresholds(this.worldData as Array<CaseCountRaw>, this.range);
       this.paintThresholds(map);
@@ -123,7 +132,9 @@ export default Vue.extend({
     },
     drawLayer(map: mapboxgl.Map, isCluster: boolean) {
       const id = isCluster ? "clusters" : "non-clusters";
-      const filter = isCluster ? ["has", "sum"] : ["!", ["has", "sum"]];
+      const filter = isCluster
+        ? ["all", ["has", "sum"], ["!=", "sum", 0]]
+        : ["all", ["!", ["has", "sum"]], ["!=", ["get", "value"], 0]];
       map.addLayer({
         id,
         type: "circle",
@@ -192,7 +203,7 @@ export default Vue.extend({
       }
       map.addSource("cases", {
         type: "geojson",
-        data: convertDataToGeoJson(data, true),
+        data: convertDataToGeoJson(data, this.type),
         cluster: true,
         clusterProperties: {
           sum: ["+", ["get", "value"]],
@@ -256,6 +267,7 @@ export default Vue.extend({
   },
   async mounted() {
     this.loading = true;
+    this.range = [0, this.worldData.length - 1];
     this.setThresholds(this.worldData as Array<CaseCountRaw>, [
       0,
       this.worldData.length - 1,
@@ -285,8 +297,8 @@ export default Vue.extend({
         this.onChangeDates(map, obj)
     );
 
-    this.$root.$on("changeShowConfirmed", (getConfirmed: boolean) =>
-      this.onChangeShowConfirmed(map, getConfirmed)
+    this.$root.$on("changeType", (type: DataTypes) =>
+      this.onChangeType(map, type)
     );
 
     map.on("load", () => this.setupMap(map));

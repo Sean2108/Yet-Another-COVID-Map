@@ -2,7 +2,7 @@ import Vue from "vue";
 import News from "../News/News.vue";
 import Chart from "../Chart/Chart.vue";
 import { fetchData } from "../../utils";
-import { NewsItem, CaseCountRaw } from "@/types";
+import { NewsItem, CaseCountRaw, DataTypes } from "@/types";
 import Vuetify from "vuetify";
 
 Vue.use(Vuetify);
@@ -43,16 +43,22 @@ export default Vue.extend({
   },
   computed: {
     getStateConfirmed: function(): number | string {
-      return this.getStats(this.stateData, true);
+      return this.getStats(this.stateData, DataTypes.CONFIRMED);
     },
     getStateDeaths: function(): number | string {
-      return this.getStats(this.stateData, false);
+      return this.getStats(this.stateData, DataTypes.DEATHS);
+    },
+    getStateRecoveries: function(): number | string {
+      return this.getStats(this.stateData, DataTypes.RECOVERIES);
     },
     getCountryConfirmed: function(): number | string {
-      return this.getStats(this.countryData, true);
+      return this.getStats(this.countryData, DataTypes.CONFIRMED);
     },
     getCountryDeaths: function(): number | string {
-      return this.getStats(this.countryData, false);
+      return this.getStats(this.countryData, DataTypes.DEATHS);
+    },
+    getCountryRecoveries: function(): number | string {
+      return this.getStats(this.countryData, DataTypes.RECOVERIES);
     },
   },
   methods: {
@@ -61,10 +67,10 @@ export default Vue.extend({
     },
     getStats: function(
       data: Array<CaseCountRaw>,
-      getConfirmed: boolean
+      key: DataTypes
     ): number | string {
       return data.length
-        ? data[data.length - 1][getConfirmed ? "confirmed" : "deaths"]
+        ? data[data.length - 1][key]
         : "Unknown";
     },
   },

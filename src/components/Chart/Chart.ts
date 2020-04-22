@@ -35,6 +35,12 @@ export default Vue.extend({
         .attr("cy", this.legendY + 20)
         .attr("r", 6)
         .style("fill", "red");
+        svg
+          .append("circle")
+          .attr("cx", this.legendX)
+          .attr("cy", this.legendY + 40)
+          .attr("r", 6)
+          .style("fill", "lightgreen");
       svg
         .append("text")
         .attr("x", this.legendX + 10)
@@ -51,6 +57,14 @@ export default Vue.extend({
         .style("font-size", "10px")
         .style("fill", "#fff")
         .attr("alignment-baseline", "middle");
+        svg
+          .append("text")
+          .attr("x", this.legendX + 10)
+          .attr("y", this.legendY + 40)
+          .text("Recoveries")
+          .style("font-size", "10px")
+          .style("fill", "#fff")
+          .attr("alignment-baseline", "middle");
     },
     drawLine(
       svg: any,
@@ -77,10 +91,11 @@ export default Vue.extend({
     },
     drawGraph(input: Array<CaseCountRaw>) {
       const data: Array<CaseCount> = input.map(
-        ({ date, confirmed, deaths }) => ({
+        ({ date, confirmed, deaths, recovered }) => ({
           date: d3.timeParse("%-m/%-d/%y")(date),
-          confirmed: confirmed,
-          deaths: deaths,
+          confirmed,
+          deaths,
+          recovered,
         })
       );
       const margin = {
@@ -127,6 +142,9 @@ export default Vue.extend({
       });
       this.drawLine(svg, data, x, "red", (d: CaseCount) => {
         return y(d.deaths);
+      });
+      this.drawLine(svg, data, x, "lightgreen", (d: CaseCount) => {
+        return y(d.recovered);
       });
 
       this.drawLegend(svg);

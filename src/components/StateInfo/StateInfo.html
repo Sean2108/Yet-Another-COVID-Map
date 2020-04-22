@@ -13,6 +13,9 @@
       <p v-if="stateData">
         Deaths: {{ getStateDeaths }}
       </p>
+      <p v-if="stateData">
+        Recoveries: {{ getStateRecoveries }}
+      </p>
     </v-expansion-panel-content>
   </v-expansion-panel>
 
@@ -23,12 +26,17 @@
     >
     <v-expansion-panel-content>
       <br />
-      <p v-if="countryData">
-        Confirmed cases: {{ getCountryConfirmed }}
-      </p>
-      <p v-if="countryData">
-        Deaths: {{ getCountryDeaths }}
-      </p>
+      <template v-if="countryData">
+        <p>
+          Confirmed cases: {{ getCountryConfirmed }}
+        </p>
+        <p>
+          Deaths: {{ getCountryDeaths }}
+        </p>
+        <p>
+          Recoveries: {{ getCountryRecoveries }}
+        </p>
+      </template>
     </v-expansion-panel-content>
   </v-expansion-panel>
 

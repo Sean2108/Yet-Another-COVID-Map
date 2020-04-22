@@ -3,6 +3,7 @@ import {
   GeoJson,
   GeoJsonFeature,
   CaseCountAggregated,
+  DataTypes,
 } from "@/types";
 import _ from "lodash";
 
@@ -26,20 +27,25 @@ export async function fetchData(
 
 export function convertDataToGeoJson(
   data: CaseCounts,
-  getConfirmed: boolean
+  type: DataTypes
 ): GeoJson {
   const features: Array<GeoJsonFeature> = Object.entries(data).flatMap(
     ([country, stateInfo]) =>
       Object.entries(stateInfo).map(
         ([
           state,
-          { lat, long, confirmed, deaths },
+          { lat, long, confirmed, deaths, recovered },
         ]): GeoJsonFeature => ({
           type: "Feature",
           properties: {
             country,
             state,
-            value: getConfirmed ? confirmed : deaths,
+            value:
+              type === DataTypes.CONFIRMED
+                ? confirmed
+                : type === DataTypes.DEATHS
+                ? deaths
+                : recovered,
           },
           geometry: { type: "Point", coordinates: [long, lat, 0.0] },
         })

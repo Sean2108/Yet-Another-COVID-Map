@@ -25,6 +25,7 @@ export interface GeoJsonFeature {
 interface Statistics {
   confirmed: number;
   deaths: number;
+  recovered: number;
 }
 
 export interface CaseCountRaw extends Statistics {
@@ -47,4 +48,10 @@ export interface NewsItem {
 export interface CaseCountAggregated extends Statistics {
   lat: number;
   long: number;
+}
+
+export enum DataTypes {
+  CONFIRMED = "confirmed",
+  DEATHS = "deaths",
+  RECOVERIES = "recovered"
 }

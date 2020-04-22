@@ -1,18 +1,34 @@
 import Vue from "vue";
 import _ from "lodash";
-import { CaseCountRaw } from "@/types";
+import { CaseCountRaw, DataTypes } from "@/types";
+
+interface DropdownOption {
+  text: string;
+  value: DataTypes;
+}
 
 interface ComponentData {
   range: Array<number>;
   max: number;
-  showConfirmed: boolean;
+  type: DataTypes;
+  items: Array<DropdownOption>;
+  typeSelection: DropdownOption;
 }
 
 export default Vue.extend({
   data: (): ComponentData => ({
     range: [0, 0],
     max: 0,
-    showConfirmed: true,
+    type: DataTypes.CONFIRMED,
+    items: [
+      { text: "Confirmed cases", value: DataTypes.CONFIRMED },
+      { text: "Deaths", value: DataTypes.DEATHS },
+      { text: "Recoveries", value: DataTypes.RECOVERIES },
+    ],
+    typeSelection: {
+      text: "Confirmed cases",
+      value: DataTypes.CONFIRMED,
+    },
   }),
   props: {
     data: Array,
@@ -35,21 +51,32 @@ export default Vue.extend({
       this.$root.$emit("changeDateRange", range);
       this.debouncedEmitChangeDates();
     },
-    changeShowConfirmed(showConfirmed: boolean) {
-      this.showConfirmed = showConfirmed;
-      this.$root.$emit("changeShowConfirmed", showConfirmed);
+    changeType(type: DataTypes) {
+      this.type = type;
+      this.$root.$emit("changeType", type);
     },
   },
   computed: {
-    from() {
+    from(): string {
       const data = this.data as Array<CaseCountRaw>;
       const [from] = this.range;
       return data[from].date;
     },
-    to() {
+    to(): string {
       const data = this.data as Array<CaseCountRaw>;
       const [, to] = this.range;
       return data[to].date;
+    },
+    typeText(): string {
+      switch (this.type) {
+        case DataTypes.CONFIRMED:
+          return "Confirmed cases";
+        case DataTypes.DEATHS:
+          return "Deaths";
+        case DataTypes.RECOVERIES:
+          return "Recoveries";
+      }
+      return "";
     },
   },
 });

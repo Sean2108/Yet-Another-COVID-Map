@@ -1,4 +1,4 @@
-<template src="./Selection.html" />
+<template src="./Selections.html" />
 
 <script src="./Selections.ts" />
 

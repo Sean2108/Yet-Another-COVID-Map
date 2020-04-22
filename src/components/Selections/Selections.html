@@ -23,12 +23,12 @@
       </template>
     </v-range-slider> </v-card-actions
   ><v-card-actions>
-    <div>
-      <v-switch
-        v-model="showConfirmed"
-        :label="showConfirmed ? 'Show Confirmed Cases' : 'Show Deaths'"
-        v-on:change="changeShowConfirmed"
-      />
-    </div>
+    <v-select
+      v-model="typeSelection"
+      :items="items"
+      v-on:input="changeType"
+      dark
+      solo
+    />
   </v-card-actions>
 </v-card>

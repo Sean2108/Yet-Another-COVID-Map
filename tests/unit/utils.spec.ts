@@ -1,14 +1,16 @@
 import { convertDataToGeoJson, getTopKSorted } from "../../src/utils";
+import { DataTypes } from '@/types';
 
 describe("convertDataToGeoJson function", () => {
-  it("should work correctly for confirmed cases", () => {
-    const data = {
+  function getTestData() {
+    return {
       Afghanistan: {
         "": {
           lat: 33,
           long: 65,
           confirmed: 996,
           deaths: 33,
+          recovered: 10
         },
       },
       Albania: {
@@ -17,6 +19,7 @@ describe("convertDataToGeoJson function", () => {
           long: 20.1683,
           confirmed: 562,
           deaths: 26,
+          recovered: 20
         },
       },
       Algeria: {
@@ -25,6 +28,7 @@ describe("convertDataToGeoJson function", () => {
           long: 1.6596,
           confirmed: 2629,
           deaths: 375,
+          recovered: 30
         },
       },
       Australia: {
@@ -33,16 +37,21 @@ describe("convertDataToGeoJson function", () => {
           long: 151.2093,
           confirmed: 2926,
           deaths: 26,
+          recovered: 40
         },
         "Northern Territory": {
           lat: -12.4634,
           long: 130.8456,
           confirmed: 28,
           deaths: 0,
+          recovered: 5
         },
       },
     };
-    const result = convertDataToGeoJson(data, true);
+  }
+
+  it("should work correctly for confirmed cases", () => {
+    const result = convertDataToGeoJson(getTestData(), DataTypes.CONFIRMED);
     const expectedFeatures = [
       {
         type: "Feature",
@@ -94,47 +103,7 @@ describe("convertDataToGeoJson function", () => {
   });
 
   it("should work correctly for deaths", () => {
-    const data = {
-      Afghanistan: {
-        "": {
-          lat: 33,
-          long: 65,
-          confirmed: 996,
-          deaths: 33,
-        },
-      },
-      Albania: {
-        "": {
-          lat: 41.1533,
-          long: 20.1683,
-          confirmed: 562,
-          deaths: 26,
-        },
-      },
-      Algeria: {
-        "": {
-          lat: 28.0339,
-          long: 1.6596,
-          confirmed: 2629,
-          deaths: 375,
-        },
-      },
-      Australia: {
-        "New South Wales": {
-          lat: -33.8688,
-          long: 151.2093,
-          confirmed: 2926,
-          deaths: 26,
-        },
-        "Northern Territory": {
-          lat: -12.4634,
-          long: 130.8456,
-          confirmed: 28,
-          deaths: 0,
-        },
-      },
-    };
-    const result = convertDataToGeoJson(data, false);
+    const result = convertDataToGeoJson(getTestData(), DataTypes.DEATHS);
     const expectedFeatures = [
       {
         type: "Feature",
@@ -178,6 +147,57 @@ describe("convertDataToGeoJson function", () => {
           country: "Australia",
           state: "Northern Territory",
           value: 0,
+        },
+        geometry: { type: "Point", coordinates: [130.8456, -12.4634, 0.0] },
+      },
+    ];
+    expect(result.features).toEqual(expectedFeatures);
+  });
+  it("should work correctly for recoveries", () => {
+    const result = convertDataToGeoJson(getTestData(), DataTypes.RECOVERIES);
+    const expectedFeatures = [
+      {
+        type: "Feature",
+        properties: {
+          country: "Afghanistan",
+          state: "",
+          value: 10,
+        },
+        geometry: { type: "Point", coordinates: [65, 33, 0.0] },
+      },
+      {
+        type: "Feature",
+        properties: {
+          country: "Albania",
+          state: "",
+          value: 20,
+        },
+        geometry: { type: "Point", coordinates: [20.1683, 41.1533, 0.0] },
+      },
+      {
+        type: "Feature",
+        properties: {
+          country: "Algeria",
+          state: "",
+          value: 30,
+        },
+        geometry: { type: "Point", coordinates: [1.6596, 28.0339, 0.0] },
+      },
+      {
+        type: "Feature",
+        properties: {
+          country: "Australia",
+          state: "New South Wales",
+          value: 40,
+        },
+        geometry: { type: "Point", coordinates: [151.2093, -33.8688, 0.0] },
+      },
+      {
+        type: "Feature",
+        properties: {
+          country: "Australia",
+          state: "Northern Territory",
+          value: 5,
         },
         geometry: { type: "Point", coordinates: [130.8456, -12.4634, 0.0] },
       },
