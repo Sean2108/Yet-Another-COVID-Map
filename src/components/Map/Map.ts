@@ -17,6 +17,7 @@ interface ComponentData {
   data: CaseCounts | null;
   getConfirmed: boolean;
   range: Array<number>;
+  loading: boolean;
   firstThreshold: number;
   secondThreshold: number;
 }
@@ -27,6 +28,7 @@ export default Vue.extend({
       data: null,
       getConfirmed: true,
       range: [0, 0],
+      loading: false,
       firstThreshold: 100000,
       secondThreshold: 200000,
     };
@@ -83,6 +85,7 @@ export default Vue.extend({
       map: mapboxgl.Map,
       { from, to, range }: { from: string; to: string; range: Array<number> }
     ) {
+      this.loading = true;
       this.range = range;
       this.setThresholds(this.worldData as Array<CaseCountCapitalised>, range);
       const data = await fetchData("cases", from, to, "", false, false, false);
@@ -91,8 +94,10 @@ export default Vue.extend({
         convertDataToGeoJson(data, this.getConfirmed) as any
       );
       this.paintThresholds(map);
+      this.loading = false;
     },
     onChangeShowConfirmed: function(map: mapboxgl.Map, getConfirmed: boolean) {
+      this.loading = true;
       this.getConfirmed = getConfirmed;
       const data = this.data;
       if (!data) {
@@ -106,6 +111,7 @@ export default Vue.extend({
         this.range
       );
       this.paintThresholds(map);
+      this.loading = false;
     },
     setupMouseEnterAndLeave(map: mapboxgl.Map, layerName: string) {
       map.on("mouseenter", layerName, function() {
@@ -240,6 +246,7 @@ export default Vue.extend({
     },
   },
   async mounted() {
+    this.loading = true;
     this.setThresholds(this.worldData as Array<CaseCountCapitalised>, [
       0,
       this.worldData.length - 1,
@@ -274,5 +281,6 @@ export default Vue.extend({
     );
 
     map.on("load", () => this.setupMap(map));
+    this.loading = false;
   },
 });

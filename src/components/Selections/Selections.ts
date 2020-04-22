@@ -1,5 +1,5 @@
 import Vue from "vue";
-import * as _ from "lodash";
+import _ from "lodash";
 import { CaseCountCapitalised } from "@/types";
 
 interface ComponentData {
@@ -22,17 +22,18 @@ export default Vue.extend({
     this.range = [0, this.max];
   },
   methods: {
-    updateDates(range: Array<number>) {
-      const data = this.data as Array<CaseCountCapitalised>;
-      this.$root.$emit("changeDateRange", range);
+    debouncedEmitChangeDates: _.debounce(function(this: any) {
       const [from, to] = this.range;
-      _.debounce(() => {
-        this.$root.$emit("changeDates", {
-          range,
-          from: data[from].Date,
-          to: data[to].Date,
-        });
-      }, 2000)();
+      const data = this.data as Array<CaseCountCapitalised>;
+      this.$root.$emit("changeDates", {
+        range: this.range,
+        from: data[from].Date,
+        to: data[to].Date,
+      });
+    }, 1000),
+    updateDates(range: Array<number>) {
+      this.$root.$emit("changeDateRange", range);
+      this.debouncedEmitChangeDates();
     },
     changeShowConfirmed(showConfirmed: boolean) {
       this.showConfirmed = showConfirmed;
