@@ -4,11 +4,12 @@ import {
   GeoJsonFeature,
   CaseCountAggregated,
   DataTypes,
+  Endpoints,
 } from "@/types";
 import _ from "lodash";
 
 export async function fetchData(
-  endpoint: "cases" | "news",
+  endpoint: Endpoints,
   from: string,
   to: string,
   country: string,
@@ -20,7 +21,7 @@ export async function fetchData(
     `https://yet-another-covid-api.herokuapp.com/${endpoint}?from=${from}&to=${to}&country=${country}&aggregatecountries=${aggregateCountries}&perday=${perDay}&worldtotal=${worldTotal}`
   );
   if (response.status !== 200) {
-    return worldTotal ? [] : {};
+    return null;
   }
   return await response.json();
 }

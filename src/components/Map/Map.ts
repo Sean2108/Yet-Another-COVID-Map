@@ -1,7 +1,7 @@
 import * as mapboxgl from "mapbox-gl";
 import Vue from "vue";
 import { fetchData, convertDataToGeoJson } from "../../utils";
-import { CaseCounts, CaseCountRaw, DataTypes } from "@/types";
+import { CaseCounts, CaseCountRaw, DataTypes, Endpoints } from "@/types";
 import Vuetify from "vuetify/lib";
 import StateInfo from "../StateInfo/StateInfo.vue";
 
@@ -67,16 +67,8 @@ export default Vue.extend({
         this.secondThreshold,
         this.thirdThreshold
       );
-      map.setPaintProperty(
-        id,
-        "circle-color",
-        paintObj["circle-color"]
-      );
-      map.setPaintProperty(
-        id,
-        "circle-radius",
-        paintObj["circle-radius"]
-      );
+      map.setPaintProperty(id, "circle-color", paintObj["circle-color"]);
+      map.setPaintProperty(id, "circle-radius", paintObj["circle-radius"]);
     },
     paintThresholds: function(map: mapboxgl.Map) {
       this.paintThreshold(map, true);
@@ -87,9 +79,11 @@ export default Vue.extend({
       { from, to, range }: { from: string; to: string; range: Array<number> }
     ) {
       this.loading = true;
+      const data =
+        (await fetchData(Endpoints.CASES, from, to, "", false, false, false)) ||
+        [];
       this.range = range;
       this.setThresholds(this.worldData as Array<CaseCountRaw>, range);
-      const data = await fetchData("cases", from, to, "", false, false, false);
       this.data = data;
       (map.getSource("cases") as mapboxgl.GeoJSONSource).setData(
         convertDataToGeoJson(data, this.type) as any
@@ -222,7 +216,7 @@ export default Vue.extend({
         );
       });
 
-      map.on("click", "non-clusters", (e) => {
+      map.on("click", "non-clusters", e => {
         if (e && e.features && e.features[0] && e.features[0].properties) {
           const coordinates = (e.features[0]
             .geometry as any).coordinates.slice();
@@ -241,7 +235,7 @@ export default Vue.extend({
           if (info) {
             new mapboxgl.Popup({
               closeButton: false,
-              maxWidth: "30vw",
+              maxWidth: this.getPopupWidth(),
               className: "popup",
             })
               .setLngLat(coordinates)
@@ -253,6 +247,15 @@ export default Vue.extend({
       this.setupMouseEnterAndLeave(map, "clusters");
       this.setupMouseEnterAndLeave(map, "non-clusters");
     },
+    getPopupWidth(): string {
+      if (this.$vuetify.breakpoint.xlOnly) {
+        return "25vw";
+      }
+      if (this.$vuetify.breakpoint.smAndDown) {
+        return "40vw";
+      }
+      return "35vw";
+    },
   },
   async mounted() {
     this.loading = true;
@@ -261,7 +264,8 @@ export default Vue.extend({
       0,
       this.worldData.length - 1,
     ]);
-    this.data = await fetchData("cases", "", "", "", false, false, false);
+    this.data =
+      (await fetchData(Endpoints.CASES, "", "", "", false, false, false)) || [];
     (mapboxgl as any).accessToken = process.env.VUE_APP_MAPBOX_ACCESS_TOKEN;
     const map = new mapboxgl.Map({
       container: "map",

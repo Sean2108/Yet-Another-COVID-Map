@@ -4,6 +4,6 @@
 
 <style scoped>
 .news-card {
-  margin-bottom: 4px;
+  margin-bottom: 0.3vw;
 }
 </style>

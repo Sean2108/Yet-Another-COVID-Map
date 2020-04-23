@@ -55,3 +55,8 @@ export enum DataTypes {
   DEATHS = "deaths",
   RECOVERIES = "recovered"
 }
+
+export enum Endpoints {
+  CASES = "cases",
+  NEWS = "news"
+}
