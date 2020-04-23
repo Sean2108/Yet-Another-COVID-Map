@@ -7,7 +7,7 @@ export default Vue.extend({
   },
   computed: {
     getStyle() {
-      return this.height ? `max-height:${this.height}px` : "";
+      return this.height ? `max-height:${this.height}vh` : "";
     }
   },
 });

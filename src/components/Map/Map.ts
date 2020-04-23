@@ -241,7 +241,7 @@ export default Vue.extend({
           if (info) {
             new mapboxgl.Popup({
               closeButton: false,
-              maxWidth: "400px",
+              maxWidth: "30vw",
               className: "popup",
             })
               .setLngLat(coordinates)

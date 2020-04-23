@@ -8,5 +8,6 @@
   display: block;
   background-color: rgba(0, 0, 0, 0.75);
   z-index: 2;
+  left: 0.8vw;
 }
 </style>
