@@ -32,6 +32,7 @@ export default Vue.extend({
   }),
   props: {
     data: Array,
+    width: String
   },
   mounted() {
     this.max = this.data.length - 1;
