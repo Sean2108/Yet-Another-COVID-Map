@@ -16,7 +16,11 @@
           :data="counts"
           :width="overlayCardWidth"
         />
-        <TablePanel class="overlay" :width="overlayCardWidth" />
+        <Table
+          class="overlay hidden-lg-and-down"
+          :width="overlayCardWidth"
+          style="top: 45vh"
+        />
       </v-container>
     </v-content>
   </v-app>
@@ -29,7 +33,7 @@ import Drawer from "./components/Drawer/Drawer.vue";
 import Map from "./components/Map/Map.vue";
 import Filters from "./components/Filters/Filters.vue";
 import Counter from "./components/Counter/Counter.vue";
-import TablePanel from "./components/TablePanel/TablePanel.vue";
+import Table from "./components/Table/Table.vue";
 import { Endpoints, DataTypes } from "@/types";
 
 export default Vue.extend({
@@ -38,7 +42,7 @@ export default Vue.extend({
     Map,
     Filters,
     Counter,
-    TablePanel,
+    Table,
   },
 
   data: () => ({

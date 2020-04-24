@@ -21,6 +21,7 @@ interface ComponentData {
       secondThreshold: number;
     };
   };
+  search: string;
 }
 
 interface ThresholdResult {
@@ -54,7 +55,11 @@ export default Vue.extend({
         secondThreshold: 0,
       },
     },
+    search: "",
   }),
+  props: {
+    width: String,
+  },
   created() {
     this.fetch("", "");
   },
