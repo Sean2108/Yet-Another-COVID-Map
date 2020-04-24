@@ -16,10 +16,7 @@
           :data="counts"
           :width="overlayCardWidth"
         />
-        <Table
-          class="overlay"
-          :width="overlayCardWidth"
-        />
+        <TablePanel class="overlay" :width="overlayCardWidth" />
       </v-container>
     </v-content>
   </v-app>
@@ -32,18 +29,16 @@ import Drawer from "./components/Drawer/Drawer.vue";
 import Map from "./components/Map/Map.vue";
 import Filters from "./components/Filters/Filters.vue";
 import Counter from "./components/Counter/Counter.vue";
-import Table from "./components/Table/Table.vue";
+import TablePanel from "./components/TablePanel/TablePanel.vue";
 import { Endpoints, DataTypes } from "@/types";
 
 export default Vue.extend({
-  name: "App",
-
   components: {
     Drawer,
     Map,
     Filters,
     Counter,
-    Table
+    TablePanel,
   },
 
   data: () => ({

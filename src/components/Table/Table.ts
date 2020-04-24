@@ -29,9 +29,6 @@ interface ThresholdResult {
 }
 
 export default Vue.extend({
-  props: {
-    width: String,
-  },
   data: (): ComponentData => ({
     headers: [
       {
@@ -107,8 +104,8 @@ export default Vue.extend({
         type,
         ratio,
         {
-          goodResult: "better than",
-          badResult: "worse than",
+          goodResult: "better than most",
+          badResult: "worse than most",
           avgResult: "average compared to",
         },
         (baseInfo: string) =>
