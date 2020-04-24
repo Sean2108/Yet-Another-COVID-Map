@@ -15,7 +15,7 @@
       <v-data-table
         :headers="headers"
         :items="items"
-        class="elevation-1"
+        class="elevation-1 transparent"
         dark
         :items-per-page="5"
         sort-by="confirmed"
@@ -23,6 +23,7 @@
         no-data-text="Data unavailable"
         :footer-props="{ 'items-per-page-options': [5] }"
         :search="search"
+        :mobile-breakpoint="0"
       >
         <template v-slot:item.deaths="{ item }">
           <v-tooltip bottom>
@@ -56,12 +57,3 @@
 </template>
 
 <script src="./Table.ts" />
-
-<style>
-.v-data-footer__pagination {
-  margin: 0 0 0 0 !important;
-}
-transparent {
-  opacity: 0;
-}
-</style>

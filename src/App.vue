@@ -1,26 +1,26 @@
 <template>
-  <v-app>
+  <v-app v-resize="onResize">
     <v-content>
-      <v-container>
+      <v-container fluid>
         <Map v-if="data.length" :worldData="data" />
         <Drawer v-if="data.length" :data="data" />
-        <Filters
-          v-if="data.length"
-          class="overlay"
-          :data="data"
-          :width="overlayCardWidth"
-        />
-        <Counter
-          v-if="data.length"
-          class="overlay"
-          :data="counts"
-          :width="overlayCardWidth"
-        />
-        <Table
-          class="overlay hidden-lg-and-down"
-          :width="overlayCardWidth"
-          style="top: 45vh"
-        />
+        <v-layout column fluid :class="scaleClass">
+          <Filters
+            v-if="data.length"
+            class="card"
+            :data="data"
+            :width="overlayCardWidth"
+          />
+          <br />
+          <Counter
+            v-if="data.length"
+            :data="counts"
+            class="card"
+            :width="overlayCardWidth"
+          />
+          <br />
+          <Table class="card" :width="overlayCardWidth" />
+        </v-layout>
       </v-container>
     </v-content>
   </v-app>
@@ -52,8 +52,11 @@ export default Vue.extend({
       [DataTypes.DEATHS]: 0,
       [DataTypes.RECOVERIES]: 0,
     },
+    overlayCardWidth: "450px",
+    scaleClass: "",
   }),
   created() {
+    this.onResize();
     fetchData(Endpoints.CASES, "", "", "", false, false, true).then(
       (response) => {
         if (response) {
@@ -67,24 +70,64 @@ export default Vue.extend({
       }
     );
   },
-  computed: {
-    overlayCardWidth() {
-      return this.$vuetify.breakpoint.xlOnly
-        ? "24vw"
-        : this.$vuetify.breakpoint.lgOnly
-        ? "30vw"
-        : "40vw";
+  methods: {
+    onResize() {
+      const { innerWidth, innerHeight } = window;
+      // probably a mobile device
+      if (innerWidth <= innerHeight) {
+        switch (this.$vuetify.breakpoint.name) {
+          case "xs":
+            this.scaleClass = "small-scale-down";
+            return;
+          case "sm":
+          case "md":
+            this.scaleClass = "med-scale-down";
+            return;
+          case "lg":
+            this.scaleClass = "large-scale-down";
+            return;
+          default:
+            this.scaleClass = "";
+            return;
+        }
+      }
+      const ranges: { [key: string]: Array<number> } = {
+        "small-scale-down": [0, 300],
+        "med-scale-down": [0, 600],
+        "large-scale-down": [600, 900],
+      };
+      for (const key in ranges) {
+        const [lower, upper] = ranges[key];
+        if (innerHeight >= lower && innerHeight < upper) {
+          this.scaleClass = key;
+          return;
+        }
+      }
+      this.scaleClass = "";
+      return;
     },
   },
 });
 </script>
 
 <style scoped>
-.overlay {
-  position: fixed;
-  display: block;
+.card {
   background-color: rgba(0, 0, 0, 0.75);
   z-index: 2;
-  left: 10px;
+}
+.small-scale-down {
+  display: inline-block;
+  transform: scale(0.35);
+  transform-origin: top left;
+}
+.med-scale-down {
+  display: inline-block;
+  transform: scale(0.5);
+  transform-origin: top left;
+}
+.large-scale-down {
+  display: inline-block;
+  transform: scale(0.65);
+  transform-origin: top left;
 }
 </style>

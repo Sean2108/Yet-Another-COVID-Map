@@ -17,8 +17,5 @@ export default Vue.extend({
     header(): string {
       return _.capitalize(this.type);
     },
-    style(): string {
-      return `top: ${this.$vuetify.breakpoint.xlOnly ? "30vh" : "45vh"}`;
-    },
   },
 });

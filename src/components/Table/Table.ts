@@ -9,7 +9,6 @@ import {
 } from "@/types";
 import _ from "lodash";
 import { DataTableHeader } from "vuetify";
-import { format } from "d3";
 
 interface ComponentData {
   headers: Array<DataTableHeader>;
@@ -58,7 +57,7 @@ export default Vue.extend({
     search: "",
   }),
   props: {
-    width: String,
+    width: String
   },
   created() {
     this.fetch("", "");
