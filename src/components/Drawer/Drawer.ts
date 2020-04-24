@@ -1,5 +1,5 @@
 import Vue from "vue";
-import { fetchData } from "../../utils";
+import { fetchData, getRatios } from "../../utils";
 import Chart from "../Chart/Chart.vue";
 import News from "../News/News.vue";
 import { CaseCountRaw, NewsItem, DataTypes, Endpoints } from "@/types";
@@ -57,6 +57,22 @@ export default Vue.extend({
         this.data as Array<CaseCountRaw>,
         DataTypes.RECOVERIES,
         this.range
+      );
+    },
+    getFatalityRate: function(): number {
+      return (
+        Math.round(
+          getRatios(this.getConfirmed, this.getDeaths, this.getRecoveries)
+            .deathsRatio * 100
+        ) / 100
+      );
+    },
+    getRecoveryRate: function(): number {
+      return (
+        Math.round(
+          getRatios(this.getConfirmed, this.getDeaths, this.getRecoveries)
+            .recoveredRatio * 100
+        ) / 100
       );
     },
   },

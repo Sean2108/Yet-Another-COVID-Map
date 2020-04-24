@@ -1,5 +1,10 @@
-import { convertDataToGeoJson, getTopKSorted } from "../../src/utils";
-import { DataTypes } from '@/types';
+import {
+  convertDataToGeoJson,
+  quickselect,
+  getThreshold,
+  getRatiosArray,
+} from "../../src/utils";
+import { DataTypes } from "@/types";
 
 describe("convertDataToGeoJson function", () => {
   function getTestData() {
@@ -10,7 +15,7 @@ describe("convertDataToGeoJson function", () => {
           long: 65,
           confirmed: 996,
           deaths: 33,
-          recovered: 10
+          recovered: 10,
         },
       },
       Albania: {
@@ -19,7 +24,7 @@ describe("convertDataToGeoJson function", () => {
           long: 20.1683,
           confirmed: 562,
           deaths: 26,
-          recovered: 20
+          recovered: 20,
         },
       },
       Algeria: {
@@ -28,7 +33,7 @@ describe("convertDataToGeoJson function", () => {
           long: 1.6596,
           confirmed: 2629,
           deaths: 375,
-          recovered: 30
+          recovered: 30,
         },
       },
       Australia: {
@@ -37,14 +42,14 @@ describe("convertDataToGeoJson function", () => {
           long: 151.2093,
           confirmed: 2926,
           deaths: 26,
-          recovered: 40
+          recovered: 40,
         },
         "Northern Territory": {
           lat: -12.4634,
           long: 130.8456,
           confirmed: 28,
           deaths: 0,
-          recovered: 5
+          recovered: 5,
         },
       },
     };
@@ -206,44 +211,65 @@ describe("convertDataToGeoJson function", () => {
   });
 });
 
-describe("getTopKSorted function", () => {
+describe("quickSelect function", () => {
   const parameters = [
     {
       description: "should behave correctly when list has >k elements",
       input: [2, 6, 8, 4, 4, 1, -1],
       k: 4,
-      expected: [4, 4, 6, 8],
+      expected: 4,
     },
     {
       description: "should behave correctly when list has =k elements",
       input: [2, 6, 8, 4, 4, 1, 0, -1],
-      k: 1,
-      expected: [8],
+      k: 7,
+      expected: 8,
     },
     {
-      description: "should return empty list when list has <k elements",
+      description: "should return largest value when list has <k elements",
       input: [8, 4, 1],
       k: 4,
-      expected: [],
+      expected: 8,
     },
     {
-      description: "should return empty list when k is negative",
+      description: "should return smallest value when k is negative",
       input: [8, 4, 1],
       k: -1,
-      expected: [],
-    },
-    {
-      description: "should return empty list for empty list",
-      input: [],
-      k: 4,
-      expected: [],
+      expected: 1,
     },
   ];
   parameters.forEach(({ description, input, k, expected }) => {
     it(description, () => {
-      expect(
-        getTopKSorted(input, k, (a, b) => (a < b ? -1 : a > b ? 1 : 0))
-      ).toEqual(expected);
+      expect(quickselect(input, k)).toEqual(expected);
     });
+  });
+});
+
+describe("getThreshold function", () => {
+  const input = [
+    { country: "a", confirmed: 3, deaths: 1, recovered: 2 }, // 33.3, 66.7
+    { country: "b", confirmed: 5, deaths: 2, recovered: 2 }, // 40, 40
+    { country: "c", confirmed: 10, deaths: 3, recovered: 5 }, // 30, 50
+    { country: "d", confirmed: 20, deaths: 4, recovered: 15 }, // 20, 75
+    { country: "e", confirmed: 8, deaths: 3, recovered: 5 }, // 37.5, 62.5
+    { country: "f", confirmed: 9, deaths: 2, recovered: 7 }, // 22.2, 77.8
+  ];
+  // after sorting death ratios: [20, 22.2, 30, 33.3, 37.5, 40]
+  // after sorting recovered ratios: [40, 50, 62.5, 66.7, 75, 77.8] 
+
+  it("should return the correct result for deaths", () => {
+    const result = getThreshold(getRatiosArray(input), DataTypes.DEATHS);
+    expect(result).toEqual({
+      firstThreshold: 30,
+      secondThreshold: 37.5
+    })
+  });
+
+  it("should return the correct result for recoveries", () => {
+    const result = getThreshold(getRatiosArray(input), DataTypes.RECOVERIES);
+    expect(result).toEqual({
+      firstThreshold: 62.5,
+      secondThreshold: 75
+    })
   });
 });

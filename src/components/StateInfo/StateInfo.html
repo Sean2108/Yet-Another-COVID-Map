@@ -8,14 +8,16 @@
       >
       <v-expansion-panel-content>
         <br />
-        <p v-if="stateData">
+        <p>
           Confirmed cases: {{ getStateConfirmed }}
         </p>
-        <p v-if="stateData">
-          Deaths: {{ getStateDeaths }}
+        <p>
+          Deaths: {{ getStateDeaths }} (Fatality rate of
+          {{getStateFatalityRate}}%)
         </p>
-        <p v-if="stateData">
-          Recoveries: {{ getStateRecoveries }}
+        <p>
+          Recoveries: {{ getStateRecoveries }} (Recovery rate of
+          {{getStateRecoveryRate}}%)
         </p>
       </v-expansion-panel-content>
     </v-expansion-panel>
@@ -54,10 +56,12 @@
             Confirmed cases: {{ getCountryConfirmed }}
           </p>
           <p>
-            Deaths: {{ getCountryDeaths }}
+            Deaths: {{ getCountryDeaths }} (Fatality rate of
+            {{getCountryFatalityRate}}%)
           </p>
           <p>
-            Recoveries: {{ getCountryRecoveries }}
+            Recoveries: {{ getCountryRecoveries }} (Recovery rate of
+            {{getCountryRecoveryRate}}%)
           </p>
         </template>
       </v-expansion-panel-content>

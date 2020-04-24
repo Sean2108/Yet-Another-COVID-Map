@@ -5,6 +5,8 @@ import {
   CaseCountAggregated,
   DataTypes,
   Endpoints,
+  TableRow,
+  CountryRatios,
 } from "@/types";
 import _ from "lodash";
 
@@ -58,16 +60,15 @@ export function convertDataToGeoJson(
   };
 }
 
-function swap<T>(arr: Array<T>, i: number, j: number) {
+function swap(arr: Array<number>, i: number, j: number) {
   [arr[i], arr[j]] = [arr[j], arr[i]];
 }
 
-function quickselectStep<T>(
-  arr: Array<T>,
+function quickselectStep(
+  arr: Array<number>,
   k: number,
   left: number,
-  right: number,
-  compare: (a: T, b: T) => number
+  right: number
 ) {
   while (right > left) {
     const t = arr[k];
@@ -75,7 +76,7 @@ function quickselectStep<T>(
     let j = right;
 
     swap(arr, left, k);
-    if (compare(arr[right], t) > 0) {
+    if (arr[right] > t) {
       swap(arr, left, right);
     }
 
@@ -83,15 +84,15 @@ function quickselectStep<T>(
       swap(arr, i, j);
       i++;
       j--;
-      while (compare(arr[i], t) < 0) {
+      while (arr[i] < t) {
         i++;
       }
-      while (compare(arr[j], t) > 0) {
+      while (arr[j] > t) {
         j--;
       }
     }
 
-    if (compare(arr[left], t) === 0) {
+    if (arr[left] === t) {
       swap(arr, left, j);
     } else {
       j++;
@@ -107,27 +108,15 @@ function quickselectStep<T>(
   }
 }
 
-function quickselect<T>(
-  arr: Array<T>,
-  k: number,
-  compare: (a: T, b: T) => number
-) {
-  const copy = _.cloneDeep(arr);
-  quickselectStep(copy, k, 0, arr.length - 1, compare);
-  return copy;
-}
-
-export function getTopKSorted<T>(
-  arr: Array<T>,
-  k: number,
-  compare: (a: T, b: T) => number
-): Array<T> {
-  if (k < 0 || k >= arr.length) {
-    return [];
+export function quickselect(arr: Array<number>, k: number): number {
+  if (!arr || !arr.length) {
+    throw "quickselect function: list cannot be empty.";
   }
-  return quickselect(arr, k, compare)
-    .slice(arr.length - k, arr.length)
-    .sort(compare);
+  k = Math.max(0, k);
+  k = Math.min(arr.length - 1, k);
+  const copy = _.cloneDeep(arr);
+  quickselectStep(copy, k, 0, arr.length - 1);
+  return copy[k];
 }
 
 export function compareByCases(
@@ -142,4 +131,40 @@ export function compareByDeaths(
   b: CaseCountAggregated
 ): number {
   return a.deaths < b.deaths ? -1 : a.deaths > b.deaths ? 1 : 0;
+}
+
+export function getRatios(
+  confirmed: number,
+  deaths: number,
+  recovered: number
+) {
+  return {
+    deathsRatio: confirmed ? (deaths / confirmed) * 100 : 0,
+    recoveredRatio: confirmed ? (recovered / confirmed) * 100 : 0,
+  };
+}
+
+export function getRatiosArray(
+  items: Array<TableRow>
+): Array<Array<string | CountryRatios>> {
+  return items.map(({ country, confirmed, deaths, recovered }) => [
+    country,
+    getRatios(confirmed, deaths, recovered),
+  ]);
+}
+
+export function getThreshold(
+  ratios: Array<Array<string | CountryRatios>>,
+  type: DataTypes
+) {
+  const ratioArr = ratios.map(([, ratio]) =>
+    type === DataTypes.DEATHS
+      ? (ratio as CountryRatios).deathsRatio
+      : (ratio as CountryRatios).recoveredRatio
+  );
+  const firstThresholdIndex = Math.floor(ratios.length / 3);
+  return {
+    firstThreshold: quickselect(ratioArr, firstThresholdIndex),
+    secondThreshold: quickselect(ratioArr, firstThresholdIndex * 2),
+  };
 }

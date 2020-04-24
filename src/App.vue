@@ -16,6 +16,10 @@
           :data="counts"
           :width="overlayCardWidth"
         />
+        <Table
+          class="overlay"
+          :width="overlayCardWidth"
+        />
       </v-container>
     </v-content>
   </v-app>
@@ -28,6 +32,7 @@ import Drawer from "./components/Drawer/Drawer.vue";
 import Map from "./components/Map/Map.vue";
 import Filters from "./components/Filters/Filters.vue";
 import Counter from "./components/Counter/Counter.vue";
+import Table from "./components/Table/Table.vue";
 import { Endpoints, DataTypes } from "@/types";
 
 export default Vue.extend({
@@ -37,7 +42,8 @@ export default Vue.extend({
     Drawer,
     Map,
     Filters,
-    Counter
+    Counter,
+    Table
   },
 
   data: () => ({
@@ -65,7 +71,7 @@ export default Vue.extend({
   computed: {
     overlayCardWidth() {
       return this.$vuetify.breakpoint.xlOnly
-        ? "20vw"
+        ? "24vw"
         : this.$vuetify.breakpoint.lgOnly
         ? "30vw"
         : "40vw";

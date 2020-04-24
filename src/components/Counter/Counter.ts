@@ -1,5 +1,6 @@
 import Vue from "vue";
 import { DataTypes } from "@/types";
+import _ from "lodash";
 
 export default Vue.extend({
   data: () => ({
@@ -14,17 +15,10 @@ export default Vue.extend({
   },
   computed: {
     header(): string {
-      switch (this.type) {
-        case DataTypes.CONFIRMED:
-          return "Confirmed";
-        case DataTypes.DEATHS:
-          return "Deaths";
-        default:
-          return "Recoveries";
-      }
+      return _.capitalize(this.type);
     },
     style(): string {
-      return `top: ${this.$vuetify.breakpoint.xlOnly ? "35vh" : "45vh"}`;
+      return `top: ${this.$vuetify.breakpoint.xlOnly ? "30vh" : "45vh"}`;
     },
   },
 });
