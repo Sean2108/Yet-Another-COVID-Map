@@ -9,6 +9,7 @@ import {
 } from "@/types";
 import _ from "lodash";
 import { DataTableHeader } from "vuetify";
+import { format } from "d3";
 
 interface ComponentData {
   headers: Array<DataTableHeader>;
@@ -56,6 +57,12 @@ export default Vue.extend({
   }),
   created() {
     this.fetch("", "");
+  },
+  mounted() {
+    this.$root.$on(
+      "changeDates",
+      ({ from, to }: { from: string; to: string }) => this.fetch(from, to)
+    );
   },
   methods: {
     async fetch(from: string, to: string) {

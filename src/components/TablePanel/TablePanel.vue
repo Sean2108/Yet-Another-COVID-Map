@@ -7,6 +7,9 @@
     style="top: 45vh"
   >
     <v-card-title class="justify-center">
+      <v-icon large left>
+        mdi-table
+      </v-icon>
       <div class="title font-weight-light">Statistics by Country</div>
     </v-card-title>
     <v-card-text>

@@ -8,6 +8,7 @@
     sort-by="confirmed"
     :sort-desc="true"
     no-data-text="Data unavailable"
+    :footer-props="{'items-per-page-options': [5]}"
   >
     <template v-slot:item.deaths="{ item }">
       <v-tooltip bottom>
@@ -36,9 +37,3 @@
 </template>
 
 <script src="./Table.ts" />
-
-<style>
-.v-data-footer__select {
-  display: none;
-}
-</style>

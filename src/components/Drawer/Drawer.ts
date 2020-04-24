@@ -2,6 +2,7 @@ import Vue from "vue";
 import { fetchData, getRatios } from "../../utils";
 import Chart from "../Chart/Chart.vue";
 import News from "../News/News.vue";
+import Table from "../Table/Table.vue";
 import { CaseCountRaw, NewsItem, DataTypes, Endpoints } from "@/types";
 
 interface ComponentData {
@@ -14,6 +15,7 @@ export default Vue.extend({
   components: {
     Chart,
     News,
+    Table,
   },
   props: {
     data: Array,
