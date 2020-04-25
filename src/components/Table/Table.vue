@@ -1,5 +1,5 @@
 <template>
-  <v-card dark raised :width="width">
+  <v-card v-if="items.length" dark raised :width="width">
     <v-card-title>
       Country Data
       <v-spacer />

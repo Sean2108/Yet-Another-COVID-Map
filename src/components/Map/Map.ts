@@ -18,10 +18,10 @@ interface ComponentData {
   data: CaseCounts;
   type: DataTypes;
   range: Array<number>;
-  loading: boolean;
   firstThreshold: number;
   secondThreshold: number;
   thirdThreshold: number;
+  loaded: boolean;
 }
 
 export default Vue.extend({
@@ -30,10 +30,10 @@ export default Vue.extend({
       data: {},
       type: DataTypes.CONFIRMED,
       range: [0, 0],
-      loading: false,
       firstThreshold: 100000,
       secondThreshold: 200000,
       thirdThreshold: 300000,
+      loaded: false,
     };
   },
   props: {
@@ -78,7 +78,7 @@ export default Vue.extend({
       map: mapboxgl.Map,
       { from, to, range }: { from: string; to: string; range: Array<number> }
     ) {
-      this.loading = true;
+      this.$root.$emit("setLoading", true);
       const data =
         (await fetchData(Endpoints.CASES, from, to, "", false, false, false)) ||
         [];
@@ -89,10 +89,10 @@ export default Vue.extend({
         convertDataToGeoJson(data, this.type) as any
       );
       this.paintThresholds(map);
-      this.loading = false;
+      this.$root.$emit("setLoading", false);
     },
     onChangeType: function(map: mapboxgl.Map, type: DataTypes) {
-      this.loading = true;
+      this.$root.$emit("setLoading", true);
       this.type = type;
       const data = this.data;
       if (!data) {
@@ -103,7 +103,7 @@ export default Vue.extend({
       );
       this.setThresholds(this.worldData as Array<CaseCountRaw>, this.range);
       this.paintThresholds(map);
-      this.loading = false;
+      this.$root.$emit("setLoading", false);
     },
     setupMouseEnterAndLeave(map: mapboxgl.Map, layerName: string) {
       map.on("mouseenter", layerName, function() {
@@ -216,7 +216,7 @@ export default Vue.extend({
         );
       });
 
-      map.on("click", "non-clusters", e => {
+      map.on("click", "non-clusters", (e) => {
         if (e && e.features && e.features[0] && e.features[0].properties) {
           const coordinates = (e.features[0]
             .geometry as any).coordinates.slice();
@@ -246,6 +246,8 @@ export default Vue.extend({
       });
       this.setupMouseEnterAndLeave(map, "clusters");
       this.setupMouseEnterAndLeave(map, "non-clusters");
+      this.$root.$emit("setLoading", false);
+      this.loaded = true;
     },
     getPopupWidth(): string {
       if (this.$vuetify.breakpoint.xlOnly) {
@@ -256,9 +258,16 @@ export default Vue.extend({
       }
       return "35vw";
     },
+    execAfterLoaded(cb: () => void, wait: number): void {
+      if (!this.loaded) {
+        window.setTimeout(() => this.execAfterLoaded(cb, wait), wait);
+      } else {
+        cb();
+      }
+    },
   },
   async mounted() {
-    this.loading = true;
+    this.$root.$emit("setLoading", true);
     this.range = [0, this.worldData.length - 1];
     this.setThresholds(this.worldData as Array<CaseCountRaw>, [
       0,
@@ -287,14 +296,13 @@ export default Vue.extend({
     this.$root.$on(
       "changeDates",
       (obj: { from: string; to: string; range: Array<number> }) =>
-        this.onChangeDates(map, obj)
+        this.execAfterLoaded(() => this.onChangeDates(map, obj), 100)
     );
 
     this.$root.$on("changeType", (type: DataTypes) =>
-      this.onChangeType(map, type)
+      this.execAfterLoaded(() => this.onChangeType(map, type), 100)
     );
 
     map.on("load", () => this.setupMap(map));
-    this.loading = false;
   },
 });

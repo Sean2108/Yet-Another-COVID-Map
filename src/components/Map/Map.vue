@@ -1,15 +1,5 @@
 <template>
-  <div>
-    <div id="map" />
-    <v-overlay z-index="1" absolute :value="loading">
-      <v-progress-circular
-        indeterminate
-        :size="70"
-        :width="7"
-        color="primary"
-      />
-    </v-overlay>
-  </div>
+  <div id="map" />
 </template>
 
 <script src="./Map.ts" />
