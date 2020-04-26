@@ -7,7 +7,7 @@ Uses Vue.js, Vuetify.js, D3.js and Mapbox.
 Deployed at https://yet-another-covid-map.herokuapp.com. Backend API is deployed separately at https://yet-another-covid-api.herokuapp.com (Source code available at: https://github.com/Sean2108/Yet-Another-COVID-Map-API).
 
 ## Demo:
-![Demo](https://imgur.com/5B1fsBh.gif)
+![Demo](https://imgur.com/IWvnxWt.gif)
 
 ## Project setup
 
