@@ -218,6 +218,10 @@ export default Vue.extend({
               showPercentages: this.showPercentages
             }
           }).$mount();
+          this.$watch(
+            "showPercentages",
+            newValue => (info.$props.showPercentages = newValue)
+          );
           if (info) {
             new mapboxgl.Popup({
               closeButton: false,

@@ -8,7 +8,7 @@ import {
 } from "@/types";
 
 const LINE_MAPPING = [
-  { type: DataTypes.CONFIRMED, text: "Confirmed cases", colour: "steelblue" },
+  { type: DataTypes.CONFIRMED, text: "Confirmed cases", colour: "cyan" },
   { type: DataTypes.DEATHS, text: "Deaths", colour: "red" },
   { type: DataTypes.RECOVERIES, text: "Recoveries", colour: "lightgreen" },
   { type: DataTypes.ACTIVE, text: "Active cases", colour: "orange" }
