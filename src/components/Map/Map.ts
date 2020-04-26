@@ -6,7 +6,7 @@ import Vuetify from "vuetify/lib";
 import StateInfo from "../StateInfo/StateInfo.vue";
 
 // below thresholds are expressed as a fraction of the world total between the given dates
-const FIRST_THRESHOLD = 0.01;
+const FIRST_THRESHOLD = 0.001;
 const SECOND_THRESHOLD = 0.1;
 const THIRD_THRESHOLD = 0.3;
 
@@ -151,13 +151,13 @@ export default Vue.extend({
           ["linear"],
           ["get", prop],
           0,
-          "#33FF73",
+          "lime",
           firstThreshold,
-          "#51bbd6",
+          "yellow",
           secondThreshold,
-          "#f1f075",
+          "orange",
           thirdThreshold,
-          "#f28cb1"
+          "red"
         ],
         "circle-radius": [
           "interpolate",
@@ -166,9 +166,9 @@ export default Vue.extend({
           0,
           15,
           firstThreshold,
-          20,
+          25,
           secondThreshold,
-          30,
+          35,
           thirdThreshold,
           40
         ]
