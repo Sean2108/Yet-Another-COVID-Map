@@ -1,6 +1,6 @@
-<template src="./News.html"/>
+<template src="./News.html" />
 
-<script src="./News.ts"/>
+<script src="./News.ts" />
 
 <style scoped>
 .news-card {

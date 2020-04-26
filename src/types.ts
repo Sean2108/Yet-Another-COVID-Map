@@ -2,7 +2,7 @@ export interface CaseCounts {
   [country: string]: {
     country: string;
     states: {
-      [state: string]: CaseCountAggregated;
+      [state: string]: CaseCountAggregatedWithLocation;
     };
   };
 }
@@ -43,6 +43,7 @@ export interface CaseCountRaw extends Statistics {
 
 export interface CaseCount extends Statistics {
   date: Date | null;
+  active: number;
 }
 
 export interface NewsItem {
@@ -55,9 +56,12 @@ export interface NewsItem {
 }
 
 export interface CaseCountAggregated extends Statistics {
+  population: number;
+}
+
+export interface CaseCountAggregatedWithLocation extends CaseCountAggregated {
   lat: number;
   long: number;
-  population: number;
 }
 
 export interface NamedCaseCountAggregated extends CaseCountAggregated {
@@ -68,11 +72,12 @@ export enum DataTypes {
   CONFIRMED = "confirmed",
   DEATHS = "deaths",
   RECOVERIES = "recovered",
+  ACTIVE = "active"
 }
 
 export enum Endpoints {
   CASES = "cases",
-  NEWS = "news",
+  NEWS = "news"
 }
 
 export interface CaseCountAggregatedWithRatios extends CaseCountAggregated {

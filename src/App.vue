@@ -12,7 +12,7 @@ import Root from "./components/Root/Root.vue";
 
 export default Vue.extend({
   components: {
-    Root,
-  },
+    Root
+  }
 });
 </script>

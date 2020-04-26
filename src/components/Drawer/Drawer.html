@@ -27,7 +27,11 @@
         <v-list-item-title>Statistics</v-list-item-title>
         <v-list-item-subtitle v-if="data">
           <p>
-            Confirmed cases: {{ getConfirmed }}
+            Active cases: {{ getActive }}
+          </p>
+          <p>
+            Confirmed cases: {{ getConfirmed }} (Infection rate of
+            {{getInfectionRate}}%)
           </p>
           <p>
             Deaths: {{ getDeaths }} (Fatality rate of {{getFatalityRate}}%)

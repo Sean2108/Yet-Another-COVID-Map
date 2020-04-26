@@ -5,6 +5,8 @@ import News from "../News/News.vue";
 import Table from "../Table/Table.vue";
 import { CaseCountRaw, NewsItem, DataTypes, Endpoints } from "@/types";
 
+const WORLD_POPULATION = 7800000000;
+
 interface ComponentData {
   drawer: boolean;
   news: Array<NewsItem>;
@@ -15,21 +17,21 @@ export default Vue.extend({
   components: {
     Chart,
     News,
-    Table,
+    Table
   },
   props: {
-    data: Array,
+    data: Array
   },
   data(): ComponentData {
     return {
       drawer: true,
       news: [],
-      range: [0, 0],
+      range: [0, 0]
     };
   },
   created() {
     fetchData(Endpoints.NEWS, "", "", "", false, false, false).then(
-      (response) => (this.news = response || [])
+      response => (this.news = response || [])
     );
   },
   mounted() {
@@ -61,22 +63,49 @@ export default Vue.extend({
         this.range
       );
     },
+    getActive: function(): number {
+      return this.getStats(
+        this.data as Array<CaseCountRaw>,
+        DataTypes.ACTIVE,
+        this.range
+      );
+    },
+    getInfectionRate: function(): number {
+      return (
+        Math.round(
+          getRatios({
+            confirmed: this.getConfirmed,
+            deaths: this.getDeaths,
+            recovered: this.getRecoveries,
+            population: WORLD_POPULATION
+          }).confirmedRatio * 100
+        ) / 100
+      );
+    },
     getFatalityRate: function(): number {
       return (
         Math.round(
-          getRatios(this.getConfirmed, this.getDeaths, this.getRecoveries)
-            .deathsRatio * 100
+          getRatios({
+            confirmed: this.getConfirmed,
+            deaths: this.getDeaths,
+            recovered: this.getRecoveries,
+            population: WORLD_POPULATION
+          }).deathsRatio * 100
         ) / 100
       );
     },
     getRecoveryRate: function(): number {
       return (
         Math.round(
-          getRatios(this.getConfirmed, this.getDeaths, this.getRecoveries)
-            .recoveredRatio * 100
+          getRatios({
+            confirmed: this.getConfirmed,
+            deaths: this.getDeaths,
+            recovered: this.getRecoveries,
+            population: WORLD_POPULATION
+          }).recoveredRatio * 100
         ) / 100
       );
-    },
+    }
   },
   methods: {
     getStats: function(
@@ -84,7 +113,13 @@ export default Vue.extend({
       key: DataTypes,
       [from, to]: Array<number>
     ): number {
+      if (key === DataTypes.ACTIVE) {
+        return Math.max(
+          this.getConfirmed - this.getDeaths - this.getRecoveries,
+          0
+        );
+      }
       return data[to][key] - (from === 0 ? 0 : data[from][key]);
-    },
-  },
+    }
+  }
 });

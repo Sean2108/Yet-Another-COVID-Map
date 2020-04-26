@@ -1,6 +1,6 @@
 import * as mapboxgl from "mapbox-gl";
 import Vue from "vue";
-import { fetchData, convertDataToGeoJson } from "../../utils";
+import { fetchData, convertDataToGeoJson, getValue } from "../../utils";
 import { CaseCounts, CaseCountRaw, DataTypes, Endpoints } from "@/types";
 import Vuetify from "vuetify/lib";
 import StateInfo from "../StateInfo/StateInfo.vue";
@@ -33,11 +33,11 @@ export default Vue.extend({
       firstThreshold: 100000,
       secondThreshold: 200000,
       thirdThreshold: 300000,
-      loaded: false,
+      loaded: false
     };
   },
   props: {
-    worldData: Array,
+    worldData: Array
   },
   methods: {
     setThresholds: function(
@@ -49,12 +49,7 @@ export default Vue.extend({
       const deaths = data[to].deaths - (from > 0 ? data[from - 1].deaths : 0);
       const recovered =
         data[to].recovered - (from > 0 ? data[from - 1].recovered : 0);
-      const globalVal =
-        this.type === DataTypes.CONFIRMED
-          ? confirmed
-          : this.type === DataTypes.DEATHS
-          ? deaths
-          : recovered;
+      const globalVal = getValue(confirmed, deaths, recovered, this.type);
       this.firstThreshold = globalVal * FIRST_THRESHOLD;
       this.secondThreshold = globalVal * SECOND_THRESHOLD;
       this.thirdThreshold = globalVal * THIRD_THRESHOLD;
@@ -128,7 +123,7 @@ export default Vue.extend({
           this.firstThreshold,
           this.secondThreshold,
           this.thirdThreshold
-        ),
+        )
       });
 
       map.addLayer({
@@ -139,8 +134,8 @@ export default Vue.extend({
         layout: {
           "text-field": isCluster ? "{sum}" : ["get", "value"],
           "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
-          "text-size": 12,
-        },
+          "text-size": 12
+        }
       });
     },
     getMapPaintObj(
@@ -162,7 +157,7 @@ export default Vue.extend({
           secondThreshold,
           "#f1f075",
           thirdThreshold,
-          "#f28cb1",
+          "#f28cb1"
         ],
         "circle-radius": [
           "interpolate",
@@ -175,8 +170,8 @@ export default Vue.extend({
           secondThreshold,
           30,
           thirdThreshold,
-          40,
-        ],
+          40
+        ]
       };
     },
     setupMap(map: mapboxgl.Map) {
@@ -189,8 +184,8 @@ export default Vue.extend({
         data: convertDataToGeoJson(data, this.type),
         cluster: true,
         clusterProperties: {
-          sum: ["+", ["get", "value"]],
-        },
+          sum: ["+", ["get", "value"]]
+        }
       } as any);
 
       this.drawLayer(map, true);
@@ -198,7 +193,7 @@ export default Vue.extend({
 
       map.on("click", "clusters", function(e: any) {
         const features = map.queryRenderedFeatures(e.point, {
-          layers: ["clusters"],
+          layers: ["clusters"]
         });
         const clusterId = features[0]?.properties?.cluster_id;
         (map.getSource(
@@ -210,13 +205,13 @@ export default Vue.extend({
 
             map.easeTo({
               center: (features[0].geometry as any).coordinates,
-              zoom,
+              zoom
             });
           }
         );
       });
 
-      map.on("click", "non-clusters", (e) => {
+      map.on("click", "non-clusters", e => {
         if (e && e.features && e.features[0] && e.features[0].properties) {
           const coordinates = (e.features[0]
             .geometry as any).coordinates.slice();
@@ -230,14 +225,14 @@ export default Vue.extend({
             propsData: {
               country,
               iso,
-              state,
-            },
+              state
+            }
           }).$mount();
           if (info) {
             new mapboxgl.Popup({
               closeButton: false,
               maxWidth: this.getPopupWidth(),
-              className: "popup",
+              className: "popup"
             })
               .setLngLat(coordinates)
               .setDOMContent(info.$el)
@@ -265,14 +260,14 @@ export default Vue.extend({
       } else {
         cb();
       }
-    },
+    }
   },
   async mounted() {
     this.$root.$emit("setLoading", true);
     this.range = [0, this.worldData.length - 1];
     this.setThresholds(this.worldData as Array<CaseCountRaw>, [
       0,
-      this.worldData.length - 1,
+      this.worldData.length - 1
     ]);
     this.data =
       (await fetchData(Endpoints.CASES, "", "", "", false, false, false)) || [];
@@ -284,13 +279,13 @@ export default Vue.extend({
       zoom: INITIAL_ZOOM,
       minZoom: MIN_ZOOM,
       maxZoom: MAX_ZOOM,
-      attributionControl: false,
+      attributionControl: false
     }).addControl(
       new mapboxgl.AttributionControl({
         customAttribution: [
           '<a href="https://github.com/Sean2108">© Sean Tan</a>',
-          '<a href="https://newsapi.org">© NewsAPI.org</a>',
-        ],
+          '<a href="https://newsapi.org">© NewsAPI.org</a>'
+        ]
       })
     );
 
@@ -305,5 +300,5 @@ export default Vue.extend({
     );
 
     map.on("load", () => this.setupMap(map));
-  },
+  }
 });

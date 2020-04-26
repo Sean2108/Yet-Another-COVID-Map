@@ -2,4 +2,4 @@
   <div :id="id" />
 </template>
 
-<script src="./Chart.ts"/>
+<script src="./Chart.ts" />

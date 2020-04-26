@@ -5,7 +5,7 @@ import {
   CaseCountAggregated,
   DataTypes,
   Endpoints,
-  CaseCountAggregatedWithRatios,
+  CaseCountAggregatedWithRatios
 } from "@/types";
 import _ from "lodash";
 
@@ -27,6 +27,25 @@ export async function fetchData(
   return await response.json();
 }
 
+export function getValue(
+  confirmed: number,
+  deaths: number,
+  recovered: number,
+  type: DataTypes
+): number {
+  switch (type) {
+    case DataTypes.DEATHS:
+      return deaths;
+    case DataTypes.RECOVERIES:
+      return recovered;
+    case DataTypes.ACTIVE:
+      return Math.max(confirmed - deaths - recovered, 0);
+    case DataTypes.CONFIRMED:
+    default:
+      return confirmed;
+  }
+}
+
 export function convertDataToGeoJson(
   data: CaseCounts,
   type: DataTypes
@@ -37,7 +56,7 @@ export function convertDataToGeoJson(
       Object.entries(states).map(
         ([
           state,
-          { lat, long, confirmed, deaths, recovered, population },
+          { lat, long, confirmed, deaths, recovered, population }
         ]): GeoJsonFeature => ({
           type: "Feature",
           properties: {
@@ -45,23 +64,17 @@ export function convertDataToGeoJson(
             country,
             state,
             population,
-            value:
-              type === DataTypes.CONFIRMED
-                ? confirmed
-                : type === DataTypes.DEATHS
-                ? deaths
-                : recovered,
+            value: getValue(confirmed, deaths, recovered, type)
           },
-          geometry: { type: "Point", coordinates: [long, lat, 0.0] },
+          geometry: { type: "Point", coordinates: [long, lat, 0.0] }
         })
       )
     );
   return {
     type: "FeatureCollection",
-    features,
+    features
   };
 }
-
 function swap(arr: Array<number>, i: number, j: number) {
   [arr[i], arr[j]] = [arr[j], arr[i]];
 }
@@ -121,27 +134,15 @@ export function quickselect(arr: Array<number>, k: number): number {
   return copy[k];
 }
 
-export function compareByCases(
-  a: CaseCountAggregated,
-  b: CaseCountAggregated
-): number {
-  return a.confirmed < b.confirmed ? -1 : a.confirmed > b.confirmed ? 1 : 0;
-}
-
-export function compareByDeaths(
-  a: CaseCountAggregated,
-  b: CaseCountAggregated
-): number {
-  return a.deaths < b.deaths ? -1 : a.deaths > b.deaths ? 1 : 0;
-}
-
-export function getRatios(item: CaseCountAggregated): CaseCountAggregatedWithRatios {
+export function getRatios(
+  item: CaseCountAggregated
+): CaseCountAggregatedWithRatios {
   const { confirmed, deaths, recovered, population } = item;
   return {
     ...item,
     confirmedRatio: population ? (confirmed / population) * 100 : 0,
     deathsRatio: confirmed ? (deaths / confirmed) * 100 : 0,
-    recoveredRatio: confirmed ? (recovered / confirmed) * 100 : 0,
+    recoveredRatio: confirmed ? (recovered / confirmed) * 100 : 0
   };
 }
 
@@ -165,6 +166,6 @@ export function getThreshold(
   const firstThresholdIndex = Math.floor(ratios.length / 3);
   return {
     firstThreshold: quickselect(ratioArr, firstThresholdIndex),
-    secondThreshold: quickselect(ratioArr, firstThresholdIndex * 2),
+    secondThreshold: quickselect(ratioArr, firstThresholdIndex * 2)
   };
 }

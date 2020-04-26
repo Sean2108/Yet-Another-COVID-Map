@@ -9,5 +9,5 @@ export default Vue.extend({
     getStyle() {
       return this.height ? `max-height:${this.height}vh` : "";
     }
-  },
+  }
 });

@@ -24,11 +24,12 @@ export default Vue.extend({
       { text: "Confirmed cases", value: DataTypes.CONFIRMED },
       { text: "Deaths", value: DataTypes.DEATHS },
       { text: "Recoveries", value: DataTypes.RECOVERIES },
+      { text: "Active cases", value: DataTypes.ACTIVE }
     ],
     typeSelection: {
       text: "Confirmed cases",
-      value: DataTypes.CONFIRMED,
-    },
+      value: DataTypes.CONFIRMED
+    }
   }),
   props: {
     data: Array,
@@ -45,7 +46,7 @@ export default Vue.extend({
       this.$root.$emit("changeDates", {
         range: this.range,
         from: data[from].date,
-        to: data[to].date,
+        to: data[to].date
       });
     }, 1000),
     updateDates(range: Array<number>) {
@@ -55,7 +56,7 @@ export default Vue.extend({
     changeType(type: DataTypes) {
       this.type = type;
       this.$root.$emit("changeType", type);
-    },
+    }
   },
   computed: {
     from(): string {
@@ -78,6 +79,6 @@ export default Vue.extend({
           return "Recoveries";
       }
       return "";
-    },
-  },
+    }
+  }
 });

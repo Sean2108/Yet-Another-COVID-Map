@@ -13,13 +13,13 @@ export default Vue.extend({
     height: Number,
     legendX: Number,
     legendY: Number,
-    marginHorizontal: Number,
+    marginHorizontal: Number
   },
   watch: {
     data: function(newVal) {
       d3.selectAll("svg").remove();
       this.drawGraph(newVal);
-    },
+    }
   },
   methods: {
     drawLegend(svg: any) {
@@ -35,12 +35,18 @@ export default Vue.extend({
         .attr("cy", this.legendY + 20)
         .attr("r", 6)
         .style("fill", "red");
-        svg
-          .append("circle")
-          .attr("cx", this.legendX)
-          .attr("cy", this.legendY + 40)
-          .attr("r", 6)
-          .style("fill", "lightgreen");
+      svg
+        .append("circle")
+        .attr("cx", this.legendX)
+        .attr("cy", this.legendY + 40)
+        .attr("r", 6)
+        .style("fill", "lightgreen");
+      svg
+        .append("circle")
+        .attr("cx", this.legendX)
+        .attr("cy", this.legendY + 60)
+        .attr("r", 6)
+        .style("fill", "orange");
       svg
         .append("text")
         .attr("x", this.legendX + 10)
@@ -57,14 +63,22 @@ export default Vue.extend({
         .style("font-size", "10px")
         .style("fill", "#fff")
         .attr("alignment-baseline", "middle");
-        svg
-          .append("text")
-          .attr("x", this.legendX + 10)
-          .attr("y", this.legendY + 40)
-          .text("Recoveries")
-          .style("font-size", "10px")
-          .style("fill", "#fff")
-          .attr("alignment-baseline", "middle");
+      svg
+        .append("text")
+        .attr("x", this.legendX + 10)
+        .attr("y", this.legendY + 40)
+        .text("Recoveries")
+        .style("font-size", "10px")
+        .style("fill", "#fff")
+        .attr("alignment-baseline", "middle");
+      svg
+        .append("text")
+        .attr("x", this.legendX + 10)
+        .attr("y", this.legendY + 60)
+        .text("Active cases")
+        .style("font-size", "10px")
+        .style("fill", "#fff")
+        .attr("alignment-baseline", "middle");
     },
     drawLine(
       svg: any,
@@ -96,13 +110,14 @@ export default Vue.extend({
           confirmed,
           deaths,
           recovered,
+          active: Math.max(confirmed - deaths - recovered, 0)
         })
       );
       const margin = {
           top: 10,
           right: this.marginHorizontal,
           bottom: 20,
-          left: this.marginHorizontal,
+          left: this.marginHorizontal
         },
         width = this.width - margin.left - margin.right,
         height = this.height - margin.top - margin.bottom;
@@ -133,7 +148,7 @@ export default Vue.extend({
           0,
           d3.max(data, function(d) {
             return +d.confirmed;
-          }) as number,
+          }) as number
         ])
         .range([height, 0]);
       svg.append("g").call(d3.axisLeft(y));
@@ -146,8 +161,11 @@ export default Vue.extend({
       this.drawLine(svg, data, x, "lightgreen", (d: CaseCount) => {
         return y(d.recovered);
       });
+      this.drawLine(svg, data, x, "orange", (d: CaseCount) => {
+        return y(d.active);
+      });
 
       this.drawLegend(svg);
-    },
-  },
+    }
+  }
 });

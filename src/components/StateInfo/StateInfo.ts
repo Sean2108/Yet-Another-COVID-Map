@@ -2,62 +2,65 @@ import Vue from "vue";
 import News from "../News/News.vue";
 import Chart from "../Chart/Chart.vue";
 import { fetchData, getRatios } from "../../utils";
-import {
-  NewsItem,
-  CaseCountRaw,
-  DataTypes,
-  Endpoints,
-  CaseCountAggregated,
-  CaseCountAggregatedWithRatios,
-} from "@/types";
+import { NewsItem, Endpoints, CaseCountAggregatedWithRatios } from "@/types";
 import Vuetify from "vuetify";
 
 Vue.use(Vuetify);
 
 interface ComponentData {
-  stateData: CaseCountAggregatedWithRatios | null;
-  countryData: CaseCountAggregatedWithRatios | null;
+  stateData: Array<CaseCountAggregatedWithRatios>;
+  countryData: Array<CaseCountAggregatedWithRatios>;
   news: Array<NewsItem>;
 }
 
 export default Vue.extend({
   components: {
     News,
-    Chart,
+    Chart
   },
   data(): ComponentData {
     return {
-      stateData: null,
-      countryData: null,
-      news: [],
+      stateData: [],
+      countryData: [],
+      news: []
     };
   },
   props: { country: String, state: String, iso: String },
   created() {
     if (this.state) {
-      fetchData(Endpoints.CASES, "", "", this.iso, false, false, false).then(
-        (response) => {
+      fetchData(Endpoints.CASES, "", "", this.iso, false, true, false).then(
+        response => {
           if (response) {
-            this.stateData = getRatios(response[this.iso].states[this.state]);
+            this.stateData = response[this.iso].states[this.state].counts.map(
+              getRatios
+            );
           }
         }
       );
     }
-    fetchData(Endpoints.CASES, "", "", this.iso, true, false, false).then(
-      (response) => {
+    fetchData(Endpoints.CASES, "", "", this.iso, true, true, false).then(
+      response => {
         if (response) {
-          this.countryData = getRatios(response[this.iso]);
+          this.countryData = response[this.iso].counts.map(getRatios);
         }
       }
     );
 
     fetchData(Endpoints.NEWS, "", "", this.country, false, false, false).then(
-      (response) => (this.news = response || [])
+      response => (this.news = response || [])
     );
+  },
+  computed: {
+    newestStateData(): CaseCountAggregatedWithRatios {
+      return this.stateData[this.stateData.length - 1];
+    },
+    newestCountryData(): CaseCountAggregatedWithRatios {
+      return this.countryData[this.countryData.length - 1];
+    }
   },
   methods: {
     getHeader: function() {
       return this.state ? `${this.state} (${this.country})` : this.country;
-    },
-  },
+    }
+  }
 });

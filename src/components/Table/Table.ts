@@ -4,7 +4,7 @@ import {
   Endpoints,
   DataTypes,
   AggCountryCaseCounts,
-  CaseCountAggregatedWithRatios,
+  CaseCountAggregatedWithRatios
 } from "@/types";
 import _ from "lodash";
 import { DataTableHeader } from "vuetify";
@@ -33,32 +33,34 @@ export default Vue.extend({
       {
         text: "Country",
         align: "start",
-        value: "country",
+        value: "country"
       },
-      ...Object.values(DataTypes).map((type) => ({
-        text: _.capitalize(type),
-        value: type,
-      })),
+      ...Object.values(DataTypes)
+        .filter(type => type !== DataTypes.ACTIVE)
+        .map(type => ({
+          text: _.capitalize(type),
+          value: type
+        }))
     ],
     items: [],
     thresholds: {
       [DataTypes.CONFIRMED]: {
         firstThreshold: 0,
-        secondThreshold: 0,
+        secondThreshold: 0
       },
       [DataTypes.DEATHS]: {
         firstThreshold: 0,
-        secondThreshold: 0,
+        secondThreshold: 0
       },
       [DataTypes.RECOVERIES]: {
         firstThreshold: 0,
-        secondThreshold: 0,
-      },
+        secondThreshold: 0
+      }
     },
-    search: "",
+    search: ""
   }),
   props: {
-    width: String,
+    width: String
   },
   created() {
     this.fetch("", "");
@@ -85,10 +87,7 @@ export default Vue.extend({
         this.thresholds = {
           [DataTypes.CONFIRMED]: getThreshold(this.items, DataTypes.CONFIRMED),
           [DataTypes.DEATHS]: getThreshold(this.items, DataTypes.DEATHS),
-          [DataTypes.RECOVERIES]: getThreshold(
-            this.items,
-            DataTypes.RECOVERIES
-          ),
+          [DataTypes.RECOVERIES]: getThreshold(this.items, DataTypes.RECOVERIES)
         };
       }
     },
@@ -99,7 +98,7 @@ export default Vue.extend({
         {
           goodResult: "green",
           badResult: "red",
-          avgResult: "orange",
+          avgResult: "orange"
         },
         (baseInfo: string) => `${baseInfo} darken-3`
       );
@@ -111,7 +110,7 @@ export default Vue.extend({
         {
           goodResult: "better than most",
           badResult: "worse than most",
-          avgResult: "average compared to",
+          avgResult: "average compared to"
         },
         (baseInfo: string) =>
           `${country} has ${this.getRateType(type)} rate of ${Math.round(
@@ -155,6 +154,6 @@ export default Vue.extend({
         baseInfo = avgResult;
       }
       return callback(baseInfo);
-    },
-  },
+    }
+  }
 });

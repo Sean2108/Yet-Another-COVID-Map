@@ -32,7 +32,7 @@
                 :color="getColour(item.confirmedRatio, 'confirmed')"
                 dark
                 v-on="on"
-                >{{ item.deaths }}</v-chip
+                >{{ item.confirmed }}</v-chip
               >
             </template>
             <span>{{

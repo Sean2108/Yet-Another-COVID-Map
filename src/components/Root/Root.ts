@@ -13,7 +13,7 @@ export default Vue.extend({
     Map,
     Filters,
     Counter,
-    Table,
+    Table
   },
 
   data: () => ({
@@ -22,10 +22,11 @@ export default Vue.extend({
       [DataTypes.CONFIRMED]: 0,
       [DataTypes.DEATHS]: 0,
       [DataTypes.RECOVERIES]: 0,
+      [DataTypes.ACTIVE]: 0
     },
-    overlayCardWidth: "450px",
+    overlayCardWidth: "480px",
     scaleClass: "",
-    loading: true,
+    loading: true
   }),
   created() {
     this.$root.$on(
@@ -34,13 +35,17 @@ export default Vue.extend({
     );
     this.onResize();
     fetchData(Endpoints.CASES, "", "", "", false, false, true).then(
-      (response) => {
+      response => {
         if (response) {
           this.data = response;
+          const { confirmed, deaths, recovered } = response[
+            response.length - 1
+          ];
           this.counts = {
-            [DataTypes.CONFIRMED]: response[response.length - 1].confirmed,
-            [DataTypes.DEATHS]: response[response.length - 1].deaths,
-            [DataTypes.RECOVERIES]: response[response.length - 1].recovered,
+            [DataTypes.CONFIRMED]: confirmed,
+            [DataTypes.DEATHS]: deaths,
+            [DataTypes.RECOVERIES]: recovered,
+            [DataTypes.ACTIVE]: Math.max(confirmed - deaths - recovered, 0)
           };
         }
         this.loading = false;
@@ -71,7 +76,7 @@ export default Vue.extend({
       const ranges: { [key: string]: Array<number> } = {
         "small-scale-down": [0, 300],
         "med-scale-down": [0, 600],
-        "large-scale-down": [600, 900],
+        "large-scale-down": [600, 900]
       };
       for (const key in ranges) {
         const [lower, upper] = ranges[key];
@@ -82,6 +87,6 @@ export default Vue.extend({
       }
       this.scaleClass = "";
       return;
-    },
-  },
+    }
+  }
 });

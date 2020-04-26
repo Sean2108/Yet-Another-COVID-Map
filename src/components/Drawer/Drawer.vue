@@ -1,3 +1,3 @@
-<template src="./Drawer.html"/>
+<template src="./Drawer.html" />
 
-<script src="./Drawer.ts"/>
+<script src="./Drawer.ts" />

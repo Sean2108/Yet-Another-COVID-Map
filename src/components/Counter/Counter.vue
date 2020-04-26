@@ -1,10 +1,5 @@
 <template>
-  <v-card
-    v-if="data"
-    dark
-    raised
-    :width="width"
-  >
+  <v-card v-if="data" dark raised :width="width">
     <v-card-title class="justify-center">
       <div class="title font-weight-light">Total {{ header }}</div>
     </v-card-title>
