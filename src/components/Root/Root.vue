@@ -1,6 +1,6 @@
 <template>
   <v-container fluid v-resize="onResize">
-    <v-overlay z-index="1" absolute :value="loading">
+    <v-overlay z-index="0" absolute :value="loading">
       <v-progress-circular
         indeterminate
         :size="70"

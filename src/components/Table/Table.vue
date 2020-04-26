@@ -1,18 +1,37 @@
 <template>
   <v-card v-if="items.length" dark raised :width="width">
-    <v-card-title>
-      Country Data
-      <v-spacer />
-      <v-text-field
-        v-model="search"
-        append-icon="mdi-magnify"
-        label="Search"
-        single-line
-        dark
-      />
+    <v-card-title class="justify-center">
+      <v-icon class="hidden-sm-and-down" large left>
+        mdi-table-furniture
+      </v-icon>
+      <span
+        :class="{
+          title: $vuetify.breakpoint.mdAndUp,
+          'subtitle-1': $vuetify.breakpoint.smAndDown,
+          'font-weight-light': true
+        }"
+        >Country Data</span
+      >
     </v-card-title>
+    <v-card-subtitle class="py-0">
+      <v-row>
+        <v-col cols="8">
+          <v-text-field
+            v-model="search"
+            append-icon="mdi-magnify"
+            label="Search"
+            single-line
+            dark
+          />
+        </v-col>
+        <v-col cols="4"
+          ><v-switch reverse dark v-model="showPercentages" label="Percentages"
+        /></v-col>
+      </v-row>
+    </v-card-subtitle>
     <v-card-text>
       <v-data-table
+        id="countryTable"
         :headers="headers"
         :items="items"
         class="elevation-1 transparent"
@@ -24,6 +43,9 @@
         :footer-props="{ 'items-per-page-options': [5] }"
         :search="search"
         :mobile-breakpoint="0"
+        must-sort
+        :custom-sort="customSort"
+        @click:row="emitRowClick"
       >
         <template v-slot:item.confirmed="{ item }">
           <v-tooltip bottom>
@@ -32,7 +54,11 @@
                 :color="getColour(item.confirmedRatio, 'confirmed')"
                 dark
                 v-on="on"
-                >{{ item.confirmed }}</v-chip
+                >{{
+                  showPercentages
+                    ? `${Math.round(item.confirmedRatio * 1000) / 1000}%`
+                    : item.confirmed
+                }}</v-chip
               >
             </template>
             <span>{{
@@ -47,7 +73,11 @@
                 :color="getColour(item.deathsRatio, 'deaths')"
                 dark
                 v-on="on"
-                >{{ item.deaths }}</v-chip
+                >{{
+                  showPercentages
+                    ? `${Math.round(item.deathsRatio * 100) / 100}%`
+                    : item.deaths
+                }}</v-chip
               >
             </template>
             <span>{{
@@ -62,7 +92,11 @@
                 :color="getColour(item.recoveredRatio, 'recovered')"
                 dark
                 v-on="on"
-                >{{ item.recovered }}</v-chip
+                >{{
+                  showPercentages
+                    ? `${Math.round(item.recoveredRatio * 100) / 100}%`
+                    : item.recovered
+                }}</v-chip
               >
             </template>
             <span>{{
@@ -76,3 +110,9 @@
 </template>
 
 <script src="./Table.ts" />
+
+<style>
+#countryTable tbody tr:hover {
+  cursor: pointer;
+}
+</style>

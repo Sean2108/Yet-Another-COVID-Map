@@ -4,7 +4,8 @@ import {
   Endpoints,
   DataTypes,
   AggCountryCaseCounts,
-  CaseCountAggregatedWithRatios
+  CaseCountAggregatedWithRatios,
+  CaseCountAggregatedWithLocation
 } from "@/types";
 import _ from "lodash";
 import { DataTableHeader } from "vuetify";
@@ -19,6 +20,7 @@ interface ComponentData {
     };
   };
   search: string;
+  showPercentages: boolean;
 }
 
 interface ThresholdResult {
@@ -57,7 +59,8 @@ export default Vue.extend({
         secondThreshold: 0
       }
     },
-    search: ""
+    search: "",
+    showPercentages: false
   }),
   props: {
     width: String
@@ -154,6 +157,28 @@ export default Vue.extend({
         baseInfo = avgResult;
       }
       return callback(baseInfo);
+    },
+    customSort(
+      items: Array<{ [key: string]: number }>,
+      index: string,
+      isDesc: Array<boolean>
+    ) {
+      const indexSuffix = this.showPercentages ? "Ratio" : "";
+      items.sort((a, b) => {
+        if (!isDesc[0]) {
+          return a[`${index}${indexSuffix}`] < b[`${index}${indexSuffix}`]
+            ? -1
+            : 1;
+        } else {
+          return b[`${index}${indexSuffix}`] < a[`${index}${indexSuffix}`]
+            ? -1
+            : 1;
+        }
+      });
+      return items;
+    },
+    emitRowClick(item: CaseCountAggregatedWithLocation) {
+      this.$root.$emit("onRowClick", item);
     }
   }
 });

@@ -1,26 +1,32 @@
 import * as mapboxgl from "mapbox-gl";
 import Vue from "vue";
 import { fetchData, convertDataToGeoJson, getValue } from "../../utils";
-import { CaseCounts, CaseCountRaw, DataTypes, Endpoints } from "@/types";
+import {
+  CaseCounts,
+  CaseCountRaw,
+  DataTypes,
+  Endpoints,
+  CaseCountAggregatedWithLocation
+} from "@/types";
 import Vuetify from "vuetify/lib";
 import StateInfo from "../StateInfo/StateInfo.vue";
 
 // below thresholds are expressed as a fraction of the world total between the given dates
-const FIRST_THRESHOLD = 0.001;
-const SECOND_THRESHOLD = 0.1;
-const THIRD_THRESHOLD = 0.3;
+const THRESHOLDS = [0, 0.001, 0.1, 0.3];
 
 const INITIAL_ZOOM = 2;
 const MIN_ZOOM = 1;
+const ON_CLICK_ZOOM = 4;
 const MAX_ZOOM = 7;
+
+const CIRCLE_COLOURS = ["lime", "yellow", "orange", "red"];
+const CIRCLE_RADII = [15, 25, 35, 40];
 
 interface ComponentData {
   data: CaseCounts;
   type: DataTypes;
   range: Array<number>;
-  firstThreshold: number;
-  secondThreshold: number;
-  thirdThreshold: number;
+  thresholds: Array<number>;
   loaded: boolean;
 }
 
@@ -30,9 +36,7 @@ export default Vue.extend({
       data: {},
       type: DataTypes.CONFIRMED,
       range: [0, 0],
-      firstThreshold: 100000,
-      secondThreshold: 200000,
-      thirdThreshold: 300000,
+      thresholds: [0, 100000, 200000, 300000],
       loaded: false
     };
   },
@@ -50,18 +54,11 @@ export default Vue.extend({
       const recovered =
         data[to].recovered - (from > 0 ? data[from - 1].recovered : 0);
       const globalVal = getValue(confirmed, deaths, recovered, this.type);
-      this.firstThreshold = globalVal * FIRST_THRESHOLD;
-      this.secondThreshold = globalVal * SECOND_THRESHOLD;
-      this.thirdThreshold = globalVal * THIRD_THRESHOLD;
+      this.thresholds = THRESHOLDS.map(threshold => threshold * globalVal);
     },
     paintThreshold: function(map: mapboxgl.Map, isCluster: boolean) {
       const id = `${isCluster ? "" : "non-"}clusters`;
-      const paintObj = this.getMapPaintObj(
-        isCluster,
-        this.firstThreshold,
-        this.secondThreshold,
-        this.thirdThreshold
-      );
+      const paintObj = this.getMapPaintObj(isCluster, this.thresholds);
       map.setPaintProperty(id, "circle-color", paintObj["circle-color"]);
       map.setPaintProperty(id, "circle-radius", paintObj["circle-radius"]);
     },
@@ -118,12 +115,7 @@ export default Vue.extend({
         type: "circle",
         source: "cases",
         filter,
-        paint: this.getMapPaintObj(
-          isCluster,
-          this.firstThreshold,
-          this.secondThreshold,
-          this.thirdThreshold
-        )
+        paint: this.getMapPaintObj(isCluster, this.thresholds)
       });
 
       map.addLayer({
@@ -140,37 +132,31 @@ export default Vue.extend({
     },
     getMapPaintObj(
       isCluster: boolean,
-      firstThreshold: number,
-      secondThreshold: number,
-      thirdThreshold: number
+      thresholds: Array<number>
     ): mapboxgl.CirclePaint {
       const prop = isCluster ? "sum" : "value";
+      const colours =
+        this.type === DataTypes.RECOVERIES
+          ? CIRCLE_COLOURS.reverse()
+          : CIRCLE_COLOURS;
       return {
         "circle-color": [
           "interpolate",
           ["linear"],
           ["get", prop],
-          0,
-          "lime",
-          firstThreshold,
-          "yellow",
-          secondThreshold,
-          "orange",
-          thirdThreshold,
-          "red"
+          ...thresholds.flatMap((threshold, index) => [
+            threshold,
+            colours[index]
+          ])
         ],
         "circle-radius": [
           "interpolate",
           ["linear"],
           ["get", prop],
-          0,
-          15,
-          firstThreshold,
-          25,
-          secondThreshold,
-          35,
-          thirdThreshold,
-          40
+          ...thresholds.flatMap((threshold, index) => [
+            threshold,
+            CIRCLE_RADII[index]
+          ])
         ]
       };
     },
@@ -255,6 +241,29 @@ export default Vue.extend({
       }
       return "35vw";
     },
+    setupMapListeners(map: mapboxgl.Map): void {
+      this.$root.$on(
+        "changeDates",
+        (obj: { from: string; to: string; range: Array<number> }) =>
+          this.execAfterLoaded(() => this.onChangeDates(map, obj), 100)
+      );
+
+      this.$root.$on("changeType", (type: DataTypes) =>
+        this.execAfterLoaded(() => this.onChangeType(map, type), 100)
+      );
+      this.$root.$on(
+        "onRowClick",
+        ({ lat, long: lon }: CaseCountAggregatedWithLocation) =>
+          this.execAfterLoaded(
+            () =>
+              map.easeTo({
+                center: { lat, lon },
+                zoom: ON_CLICK_ZOOM
+              }),
+            100
+          )
+      );
+    },
     execAfterLoaded(cb: () => void, wait: number): void {
       if (!this.loaded) {
         window.setTimeout(() => this.execAfterLoaded(cb, wait), wait);
@@ -290,16 +299,7 @@ export default Vue.extend({
       })
     );
 
-    this.$root.$on(
-      "changeDates",
-      (obj: { from: string; to: string; range: Array<number> }) =>
-        this.execAfterLoaded(() => this.onChangeDates(map, obj), 100)
-    );
-
-    this.$root.$on("changeType", (type: DataTypes) =>
-      this.execAfterLoaded(() => this.onChangeType(map, type), 100)
-    );
-
+    this.setupMapListeners(map);
     map.on("load", () => this.setupMap(map));
   }
 });
