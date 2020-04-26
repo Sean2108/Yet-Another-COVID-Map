@@ -183,6 +183,7 @@ export default Vue.extend({
         type: "geojson",
         data: convertDataToGeoJson(data, this.type),
         cluster: true,
+        clusterRadius: 60,
         clusterProperties: {
           sum: ["+", ["get", "value"]]
         }
