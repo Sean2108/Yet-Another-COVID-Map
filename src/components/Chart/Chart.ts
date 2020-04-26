@@ -39,11 +39,11 @@ export default Vue.extend({
   },
   watch: {
     data: function(newVal) {
-      d3.selectAll("svg").remove();
+      d3.selectAll(`#${this.id} > svg`).remove();
       this.drawGraph(newVal, this.showPercentages);
     },
     showPercentages: function(newVal: boolean) {
-      d3.selectAll("svg").remove();
+      d3.selectAll(`#${this.id} > svg`).remove();
       this.drawGraph(this.data as any, newVal);
     }
   },
