@@ -1,19 +1,17 @@
 import Vue from "vue";
-import { fetchData, getThreshold, getRatiosArray } from "../../utils";
+import { fetchData, getThreshold, getRatios } from "../../utils";
 import {
   Endpoints,
   DataTypes,
   AggCountryCaseCounts,
-  TableRow,
-  RatiosLookup,
+  CaseCountAggregatedWithRatios,
 } from "@/types";
 import _ from "lodash";
 import { DataTableHeader } from "vuetify";
 
 interface ComponentData {
   headers: Array<DataTableHeader>;
-  items: Array<TableRow>;
-  ratioLookup: RatiosLookup;
+  items: Array<CaseCountAggregatedWithRatios>;
   thresholds: {
     [type: string]: {
       firstThreshold: number;
@@ -43,8 +41,11 @@ export default Vue.extend({
       })),
     ],
     items: [],
-    ratioLookup: {},
     thresholds: {
+      [DataTypes.CONFIRMED]: {
+        firstThreshold: 0,
+        secondThreshold: 0,
+      },
       [DataTypes.DEATHS]: {
         firstThreshold: 0,
         secondThreshold: 0,
@@ -57,7 +58,7 @@ export default Vue.extend({
     search: "",
   }),
   props: {
-    width: String
+    width: String,
   },
   created() {
     this.fetch("", "");
@@ -79,23 +80,19 @@ export default Vue.extend({
         false,
         false
       );
-      this.items = Object.entries(response).map(([country, info]) => ({
-        country,
-        ...info,
-      }));
+      this.items = Object.values(response).map(getRatios);
       if (this.items.length) {
-        const ratios = getRatiosArray(this.items);
-        this.ratioLookup = Object.fromEntries(ratios);
         this.thresholds = {
-          [DataTypes.DEATHS]: getThreshold(ratios, DataTypes.DEATHS),
-          [DataTypes.RECOVERIES]: getThreshold(ratios, DataTypes.RECOVERIES),
+          [DataTypes.CONFIRMED]: getThreshold(this.items, DataTypes.CONFIRMED),
+          [DataTypes.DEATHS]: getThreshold(this.items, DataTypes.DEATHS),
+          [DataTypes.RECOVERIES]: getThreshold(
+            this.items,
+            DataTypes.RECOVERIES
+          ),
         };
       }
     },
-    getColour(country: string, type: DataTypes): string {
-      const ratio = this.ratioLookup[country][
-        type === DataTypes.DEATHS ? "deathsRatio" : "recoveredRatio"
-      ];
+    getColour(ratio: number, type: DataTypes): string {
       return this.getThresholdInfo(
         type,
         ratio,
@@ -107,10 +104,7 @@ export default Vue.extend({
         (baseInfo: string) => `${baseInfo} darken-3`
       );
     },
-    getTooltip(country: string, type: DataTypes): string {
-      const ratio = this.ratioLookup[country][
-        type === DataTypes.DEATHS ? "deathsRatio" : "recoveredRatio"
-      ];
+    getTooltip(ratio: number, country: string, type: DataTypes): string {
       return this.getThresholdInfo(
         type,
         ratio,
@@ -120,11 +114,21 @@ export default Vue.extend({
           avgResult: "average compared to",
         },
         (baseInfo: string) =>
-          `${country} has a ${
-            type === DataTypes.DEATHS ? "fatality" : "recovery"
-          } rate of ${Math.round(ratio * 100) /
-            100}% which is ${baseInfo} other countries.`
+          `${country} has ${this.getRateType(type)} rate of ${Math.round(
+            ratio * 100
+          ) / 100}% which is ${baseInfo} other countries.`
       );
+    },
+    getRateType(type: DataTypes) {
+      switch (type) {
+        case DataTypes.CONFIRMED:
+          return "an infection";
+        case DataTypes.DEATHS:
+          return "a fatality";
+        case DataTypes.RECOVERIES:
+        default:
+          return "a recovery";
+      }
     },
     getThresholdInfo(
       type: DataTypes,
@@ -136,12 +140,14 @@ export default Vue.extend({
       let baseInfo;
       const { goodResult, badResult, avgResult } = options;
       if (
-        (type === DataTypes.DEATHS && ratio < firstThreshold) ||
+        ((type === DataTypes.CONFIRMED || type === DataTypes.DEATHS) &&
+          ratio < firstThreshold) ||
         (type === DataTypes.RECOVERIES && ratio >= secondThreshold)
       ) {
         baseInfo = goodResult;
       } else if (
-        (type === DataTypes.DEATHS && ratio > secondThreshold) ||
+        ((type === DataTypes.CONFIRMED || type === DataTypes.DEATHS) &&
+          ratio > secondThreshold) ||
         (type === DataTypes.RECOVERIES && ratio <= secondThreshold)
       ) {
         baseInfo = badResult;

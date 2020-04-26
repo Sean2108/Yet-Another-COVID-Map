@@ -1,11 +1,14 @@
 export interface CaseCounts {
   [country: string]: {
-    [state: string]: CaseCountAggregated;
+    country: string;
+    states: {
+      [state: string]: CaseCountAggregated;
+    };
   };
 }
 
 export interface AggCountryCaseCounts {
-  [country: string]: CaseCountAggregated;
+  [country: string]: NamedCaseCountAggregated;
 }
 
 export interface GeoJson {
@@ -16,8 +19,10 @@ export interface GeoJson {
 export interface GeoJsonFeature {
   type: string;
   properties: {
+    iso: string;
     country: string;
     state: string;
+    population: number;
     value: number;
   };
   geometry: {
@@ -52,6 +57,11 @@ export interface NewsItem {
 export interface CaseCountAggregated extends Statistics {
   lat: number;
   long: number;
+  population: number;
+}
+
+export interface NamedCaseCountAggregated extends CaseCountAggregated {
+  country: string;
 }
 
 export enum DataTypes {
@@ -65,15 +75,8 @@ export enum Endpoints {
   NEWS = "news",
 }
 
-export interface TableRow extends Statistics {
-  country: string;
-}
-
-export interface CountryRatios {
+export interface CaseCountAggregatedWithRatios extends CaseCountAggregated {
+  confirmedRatio: number;
   deathsRatio: number;
   recoveredRatio: number;
-}
-
-export interface RatiosLookup {
-  [country: string]: CountryRatios;
 }

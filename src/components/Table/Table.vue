@@ -25,30 +25,49 @@
         :search="search"
         :mobile-breakpoint="0"
       >
-        <template v-slot:item.deaths="{ item }">
+        <template v-slot:item.confirmed="{ item }">
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
               <v-chip
-                :color="getColour(item.country, 'deaths')"
+                :color="getColour(item.confirmedRatio, 'confirmed')"
                 dark
                 v-on="on"
                 >{{ item.deaths }}</v-chip
               >
             </template>
-            <span>{{ getTooltip(item.country, "deaths") }}</span>
+            <span>{{
+              getTooltip(item.confirmedRatio, item.country, "confirmed")
+            }}</span>
+          </v-tooltip>
+        </template>
+        <template v-slot:item.deaths="{ item }">
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+              <v-chip
+                :color="getColour(item.deathsRatio, 'deaths')"
+                dark
+                v-on="on"
+                >{{ item.deaths }}</v-chip
+              >
+            </template>
+            <span>{{
+              getTooltip(item.deathsRatio, item.country, "deaths")
+            }}</span>
           </v-tooltip>
         </template>
         <template v-slot:item.recovered="{ item }">
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
               <v-chip
-                :color="getColour(item.country, 'recovered')"
+                :color="getColour(item.recoveredRatio, 'recovered')"
                 dark
                 v-on="on"
                 >{{ item.recovered }}</v-chip
               >
             </template>
-            <span>{{ getTooltip(item.country, "recovered") }}</span>
+            <span>{{
+              getTooltip(item.recoveredRatio, item.country, "recovered")
+            }}</span>
           </v-tooltip>
         </template>
       </v-data-table>

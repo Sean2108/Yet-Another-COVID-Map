@@ -5,8 +5,7 @@ import {
   CaseCountAggregated,
   DataTypes,
   Endpoints,
-  TableRow,
-  CountryRatios,
+  CaseCountAggregatedWithRatios,
 } from "@/types";
 import _ from "lodash";
 
@@ -32,17 +31,20 @@ export function convertDataToGeoJson(
   data: CaseCounts,
   type: DataTypes
 ): GeoJson {
-  const features: Array<GeoJsonFeature> = Object.entries(data).flatMap(
-    ([country, stateInfo]) =>
-      Object.entries(stateInfo).map(
+  const features: Array<GeoJsonFeature> = Object.entries(data)
+    .map(([iso, countryInfo]) => ({ iso, ...countryInfo }))
+    .flatMap(({ iso, country, states }) =>
+      Object.entries(states).map(
         ([
           state,
-          { lat, long, confirmed, deaths, recovered },
+          { lat, long, confirmed, deaths, recovered, population },
         ]): GeoJsonFeature => ({
           type: "Feature",
           properties: {
+            iso,
             country,
             state,
+            population,
             value:
               type === DataTypes.CONFIRMED
                 ? confirmed
@@ -53,7 +55,7 @@ export function convertDataToGeoJson(
           geometry: { type: "Point", coordinates: [long, lat, 0.0] },
         })
       )
-  );
+    );
   return {
     type: "FeatureCollection",
     features,
@@ -133,34 +135,32 @@ export function compareByDeaths(
   return a.deaths < b.deaths ? -1 : a.deaths > b.deaths ? 1 : 0;
 }
 
-export function getRatios(
-  confirmed: number,
-  deaths: number,
-  recovered: number
-) {
+export function getRatios(item: CaseCountAggregated): CaseCountAggregatedWithRatios {
+  const { confirmed, deaths, recovered, population } = item;
   return {
+    ...item,
+    confirmedRatio: population ? (confirmed / population) * 100 : 0,
     deathsRatio: confirmed ? (deaths / confirmed) * 100 : 0,
     recoveredRatio: confirmed ? (recovered / confirmed) * 100 : 0,
   };
 }
 
-export function getRatiosArray(
-  items: Array<TableRow>
-): Array<Array<string | CountryRatios>> {
-  return items.map(({ country, confirmed, deaths, recovered }) => [
-    country,
-    getRatios(confirmed, deaths, recovered),
-  ]);
-}
-
 export function getThreshold(
-  ratios: Array<Array<string | CountryRatios>>,
+  ratios: Array<CaseCountAggregatedWithRatios>,
   type: DataTypes
 ) {
-  const ratioArr = ratios.map(([, ratio]) =>
-    type === DataTypes.DEATHS
-      ? (ratio as CountryRatios).deathsRatio
-      : (ratio as CountryRatios).recoveredRatio
+  const ratioArr = ratios.map(
+    ({ confirmedRatio, deathsRatio, recoveredRatio }) => {
+      switch (type) {
+        case DataTypes.CONFIRMED:
+          return confirmedRatio;
+        case DataTypes.DEATHS:
+          return deathsRatio;
+        case DataTypes.RECOVERIES:
+        default:
+          return recoveredRatio;
+      }
+    }
   );
   const firstThresholdIndex = Math.floor(ratios.length / 3);
   return {

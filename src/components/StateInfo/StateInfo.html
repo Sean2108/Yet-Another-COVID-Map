@@ -1,7 +1,7 @@
 <v-expansion-panels accordion focusable dark>
   <v-subheader light>{{getHeader()}}</v-subheader>
 
-  <template v-if="stateData.length">
+  <template v-if="stateData">
     <v-expansion-panel>
       <v-expansion-panel-header disable-icon-rotate expand-icon="mdi-counter">
         Statistics (State)</v-expansion-panel-header
@@ -9,15 +9,16 @@
       <v-expansion-panel-content>
         <br />
         <p>
-          Confirmed cases: {{ getStateConfirmed }}
+          Confirmed cases: {{ stateData.confirmed }} (Infection rate of
+          {{stateData.confirmedRatio}}%)
         </p>
         <p>
-          Deaths: {{ getStateDeaths }} (Fatality rate of
-          {{getStateFatalityRate}}%)
+          Deaths: {{ stateData.deaths }} (Fatality rate of
+          {{stateData.deathsRatio}}%)
         </p>
         <p>
           Recoveries: {{ getStateRecoveries }} (Recovery rate of
-          {{getStateRecoveryRate}}%)
+          {{stateData.recoveredRatio}}%)
         </p>
       </v-expansion-panel-content>
     </v-expansion-panel>
@@ -43,7 +44,7 @@
     </v-expansion-panel>
   </template>
 
-  <template v-if="countryData.length">
+  <template v-if="countryData">
     <v-expansion-panel>
       <v-expansion-panel-header disable-icon-rotate expand-icon="mdi-counter">
         {{state ? "Statistics (Country)" :
@@ -53,15 +54,16 @@
         <br />
         <template v-if="countryData">
           <p>
-            Confirmed cases: {{ getCountryConfirmed }}
+            Confirmed cases: {{ countryData.confirmed }} (Infection rate of
+            {{countryData.confirmedRatio}}%)
           </p>
           <p>
-            Deaths: {{ getCountryDeaths }} (Fatality rate of
-            {{getCountryFatalityRate}}%)
+            Deaths: {{ countryData.deaths }} (Fatality rate of
+            {{countryData.deathsRatio}}%)
           </p>
           <p>
-            Recoveries: {{ getCountryRecoveries }} (Recovery rate of
-            {{getCountryRecoveryRate}}%)
+            Recoveries: {{ countryData.recovered }} (Recovery rate of
+            {{countryData.recoveredRatio}}%)
           </p>
         </template>
       </v-expansion-panel-content>

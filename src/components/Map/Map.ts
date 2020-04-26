@@ -221,7 +221,7 @@ export default Vue.extend({
           const coordinates = (e.features[0]
             .geometry as any).coordinates.slice();
           const properties = e.features[0].properties;
-          const { country, state } = properties;
+          const { iso, country, state } = properties;
           while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
             coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
           }
@@ -229,6 +229,7 @@ export default Vue.extend({
             vuetify: new Vuetify(),
             propsData: {
               country,
+              iso,
               state,
             },
           }).$mount();
