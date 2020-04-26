@@ -1,5 +1,5 @@
 import Vue from "vue";
-import { fetchData } from "../../utils";
+import { fetchData, getRatios } from "../../utils";
 import Drawer from "../Drawer/Drawer.vue";
 import Map from "../Map/Map.vue";
 import Filters from "../Filters/Filters.vue";
@@ -37,7 +37,7 @@ export default Vue.extend({
     fetchData(Endpoints.CASES, "", "", "", false, false, true).then(
       response => {
         if (response) {
-          this.data = response;
+          this.data = response.map(getRatios);
           const { confirmed, deaths, recovered } = response[
             response.length - 1
           ];

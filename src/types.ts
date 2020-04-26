@@ -85,3 +85,17 @@ export interface CaseCountAggregatedWithRatios extends CaseCountAggregated {
   deathsRatio: number;
   recoveredRatio: number;
 }
+
+interface ChartInput extends Statistics {
+  active: number;
+  deathsRatio: number;
+  recoveredRatio: number;
+}
+
+export interface ChartInputWithRawDate extends ChartInput {
+  date: string;
+}
+
+export interface ChartInputWithDate extends ChartInput {
+  date: Date | null;
+}

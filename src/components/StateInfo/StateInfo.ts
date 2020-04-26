@@ -25,7 +25,12 @@ export default Vue.extend({
       news: []
     };
   },
-  props: { country: String, state: String, iso: String },
+  props: {
+    country: String,
+    state: String,
+    iso: String,
+    showPercentages: Boolean
+  },
   created() {
     if (this.state) {
       fetchData(Endpoints.CASES, "", "", this.iso, false, true, false).then(

@@ -75,6 +75,9 @@ export default Vue.extend({
     );
   },
   methods: {
+    updateShowPercentages(value: boolean) {
+      this.$root.$emit("onChangeShowPercentages", value);
+    },
     async fetch(from: string, to: string) {
       const response: AggCountryCaseCounts = await fetchData(
         Endpoints.CASES,

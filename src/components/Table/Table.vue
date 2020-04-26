@@ -25,7 +25,12 @@
           />
         </v-col>
         <v-col cols="4"
-          ><v-switch reverse dark v-model="showPercentages" label="Percentages"
+          ><v-switch
+            reverse
+            dark
+            v-model="showPercentages"
+            label="Percentages"
+            @change="updateShowPercentages"
         /></v-col>
       </v-row>
     </v-card-subtitle>

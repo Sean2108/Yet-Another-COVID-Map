@@ -1,17 +1,30 @@
 import * as d3 from "d3";
 import Vue from "vue";
-import { CaseCountRaw, CaseCount, DataTypes } from "@/types";
+import {
+  CaseCount,
+  DataTypes,
+  ChartInputWithRawDate,
+  ChartInputWithDate
+} from "@/types";
 
 const LINE_MAPPING = [
   { type: DataTypes.CONFIRMED, text: "Confirmed cases", colour: "steelblue" },
   { type: DataTypes.DEATHS, text: "Deaths", colour: "red" },
   { type: DataTypes.RECOVERIES, text: "Recoveries", colour: "lightgreen" },
-  { type: DataTypes.ACTIVE, text: "Active cases", colour: "orange" },
+  { type: DataTypes.ACTIVE, text: "Active cases", colour: "orange" }
+];
+
+const RATIO_MAPPING = [
+  { type: "deathsRatio", text: "Fatality rate", colour: "red" },
+  { type: "recoveredRatio", text: "Recovery rate", colour: "lightgreen" }
 ];
 
 export default Vue.extend({
   mounted() {
-    this.drawGraph(this.data as Array<CaseCountRaw>);
+    this.drawGraph(
+      this.data as Array<ChartInputWithRawDate>,
+      this.showPercentages
+    );
   },
   props: {
     id: String,
@@ -20,13 +33,19 @@ export default Vue.extend({
     height: Number,
     legendX: Number,
     legendY: Number,
-    marginHorizontal: Number,
+    marginLeft: Number,
+    marginRight: Number,
+    showPercentages: Boolean
   },
   watch: {
     data: function(newVal) {
       d3.selectAll("svg").remove();
-      this.drawGraph(newVal);
+      this.drawGraph(newVal, this.showPercentages);
     },
+    showPercentages: function(newVal: boolean) {
+      d3.selectAll("svg").remove();
+      this.drawGraph(this.data as any, newVal);
+    }
   },
   methods: {
     onMouseEnter(svg: any, colour: string) {
@@ -69,16 +88,18 @@ export default Vue.extend({
         .on("mouseenter", () => this.onMouseEnter(svg, colour))
         .on("mouseleave", () => this.onMouseLeave(svg));
     },
-    drawLegendSection(svg: any) {
+    drawLegendSection(svg: any, showPercentages: boolean) {
       let yOffset = 0;
-      LINE_MAPPING.forEach(({ text, colour }) => {
-        this.drawLegend(svg, text, colour, yOffset);
-        yOffset += 20;
-      });
+      (showPercentages ? RATIO_MAPPING : LINE_MAPPING).forEach(
+        ({ text, colour }) => {
+          this.drawLegend(svg, text, colour, yOffset);
+          yOffset += 20;
+        }
+      );
     },
     drawLine(
       svg: any,
-      data: Array<CaseCount>,
+      data: Array<ChartInputWithDate>,
       x: d3.ScaleTime<number, number>,
       lineColour: string,
       getYFunc: (d: CaseCount) => any
@@ -104,21 +125,17 @@ export default Vue.extend({
         .on("mouseenter", () => this.onMouseEnter(svg, lineColour))
         .on("mouseleave", () => this.onMouseLeave(svg));
     },
-    drawGraph(input: Array<CaseCountRaw>) {
-      const data: Array<CaseCount> = input.map(
-        ({ date, confirmed, deaths, recovered }) => ({
-          date: d3.timeParse("%-m/%-d/%y")(date),
-          confirmed,
-          deaths,
-          recovered,
-          active: Math.max(confirmed - deaths - recovered, 0),
-        })
-      );
+    drawGraph(input: Array<ChartInputWithRawDate>, showPercentages: boolean) {
+      const data: Array<ChartInputWithDate> = input.map(item => ({
+        ...item,
+        date: d3.timeParse("%-m/%-d/%y")(item.date),
+        active: Math.max(item.confirmed - item.deaths - item.recovered, 0)
+      }));
       const margin = {
           top: 10,
-          right: this.marginHorizontal,
+          right: this.marginRight,
           bottom: 20,
-          left: this.marginHorizontal,
+          left: this.marginLeft
         },
         width = this.width - margin.left - margin.right,
         height = this.height - margin.top - margin.bottom;
@@ -147,19 +164,24 @@ export default Vue.extend({
         .scaleLinear()
         .domain([
           0,
-          d3.max(data, function(d) {
-            return +d.confirmed;
-          }) as number,
+          showPercentages
+            ? (d3.max(data, d =>
+                Math.max(+d.deathsRatio, +d.recoveredRatio)
+              ) as number)
+            : (d3.max(data, function(d) {
+                return +d.confirmed;
+              }) as number)
         ])
         .range([height, 0]);
       svg.append("g").call(d3.axisLeft(y));
-      LINE_MAPPING.forEach(({ type, colour }) =>
-        this.drawLine(svg, data, x, colour, (d: CaseCount) => {
-          return y(d[type]);
-        })
+      (showPercentages ? RATIO_MAPPING : LINE_MAPPING).forEach(
+        ({ type, colour }) =>
+          this.drawLine(svg, data, x, colour, (d: { [key: string]: any }) => {
+            return y(d[type]);
+          })
       );
 
-      this.drawLegendSection(svg);
-    },
-  },
+      this.drawLegendSection(svg, showPercentages);
+    }
+  }
 });

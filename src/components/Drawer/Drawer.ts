@@ -11,6 +11,7 @@ interface ComponentData {
   drawer: boolean;
   news: Array<NewsItem>;
   range: Array<number>;
+  showPercentages: boolean;
 }
 
 export default Vue.extend({
@@ -26,12 +27,17 @@ export default Vue.extend({
     return {
       drawer: true,
       news: [],
-      range: [0, 0]
+      range: [0, 0],
+      showPercentages: false
     };
   },
   created() {
     fetchData(Endpoints.NEWS, "", "", "", false, false, false).then(
       response => (this.news = response || [])
+    );
+    this.$root.$on(
+      "onChangeShowPercentages",
+      (value: boolean) => (this.showPercentages = value)
     );
   },
   mounted() {

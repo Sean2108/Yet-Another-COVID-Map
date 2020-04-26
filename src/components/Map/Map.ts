@@ -28,6 +28,7 @@ interface ComponentData {
   range: Array<number>;
   thresholds: Array<number>;
   loaded: boolean;
+  showPercentages: boolean;
 }
 
 export default Vue.extend({
@@ -37,7 +38,8 @@ export default Vue.extend({
       type: DataTypes.CONFIRMED,
       range: [0, 0],
       thresholds: [0, 100000, 200000, 300000],
-      loaded: false
+      loaded: false,
+      showPercentages: false
     };
   },
   props: {
@@ -212,7 +214,8 @@ export default Vue.extend({
             propsData: {
               country,
               iso,
-              state
+              state,
+              showPercentages: this.showPercentages
             }
           }).$mount();
           if (info) {
@@ -262,6 +265,10 @@ export default Vue.extend({
               }),
             100
           )
+      );
+      this.$root.$on(
+        "onChangeShowPercentages",
+        (value: boolean) => (this.showPercentages = value)
       );
     },
     execAfterLoaded(cb: () => void, wait: number): void {
