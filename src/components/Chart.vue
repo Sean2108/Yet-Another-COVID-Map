@@ -1,3 +1,8 @@
+<template>
+  <div :id="id" />
+</template>
+
+<script lang="ts">
 import * as d3 from "d3";
 import Vue from "vue";
 import {
@@ -185,3 +190,4 @@ export default Vue.extend({
     }
   }
 });
+</script>

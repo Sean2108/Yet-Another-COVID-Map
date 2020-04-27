@@ -1,6 +1,11 @@
+<template>
+  <div id="map" />
+</template>
+
+<script lang="ts">
 import * as mapboxgl from "mapbox-gl";
 import Vue from "vue";
-import { fetchData, convertDataToGeoJson, getValue } from "../../utils";
+import { fetchData, convertDataToGeoJson, getValue } from "../utils";
 import {
   CaseCounts,
   CaseCountRaw,
@@ -9,7 +14,7 @@ import {
   CaseCountAggregatedWithLocation
 } from "@/types";
 import Vuetify from "vuetify/lib";
-import StateInfo from "../StateInfo/StateInfo.vue";
+import StateInfo from "./StateInfo.vue";
 
 // below thresholds are expressed as a fraction of the world total between the given dates
 const THRESHOLDS = [0, 0.001, 0.1, 0.3];
@@ -314,3 +319,21 @@ export default Vue.extend({
     map.on("load", () => this.setupMap(map));
   }
 });
+</script>
+
+<style scoped>
+body {
+  margin: 0;
+  padding: 0;
+}
+#map {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+}
+.v-progress-circular {
+  margin: 1rem;
+}
+</style>

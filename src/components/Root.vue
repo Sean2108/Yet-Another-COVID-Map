@@ -1,11 +1,44 @@
+<template>
+  <v-container fluid v-resize="onResize">
+    <v-overlay z-index="0" absolute :value="loading">
+      <v-progress-circular
+        indeterminate
+        :size="70"
+        :width="7"
+        color="primary"
+      />
+    </v-overlay>
+    <Map v-if="data.length" :worldData="data" />
+    <Drawer v-if="data.length" :data="data" />
+    <v-layout column fluid :class="scaleClass">
+      <Filters
+        v-if="data.length"
+        class="card"
+        :data="data"
+        :width="overlayCardWidth"
+      />
+      <br />
+      <Counter
+        v-if="data.length"
+        :data="counts"
+        class="card"
+        :width="overlayCardWidth"
+      />
+      <br />
+      <Table class="card" :width="overlayCardWidth" />
+    </v-layout>
+  </v-container>
+</template>
+
+<script lang="ts">
 import Vue from "vue";
-import { fetchData, getRatios } from "../../utils";
-import Drawer from "../Drawer/Drawer.vue";
-import Map from "../Map/Map.vue";
-import Filters from "../Filters/Filters.vue";
-import Counter from "../Counter/Counter.vue";
-import Table from "../Table/Table.vue";
-import { Endpoints, DataTypes } from "@/types";
+import { fetchData, getRatios } from "../utils";
+import Drawer from "./Drawer.vue";
+import Map from "./Map.vue";
+import Filters from "./Filters.vue";
+import Counter from "./Counter.vue";
+import Table from "./Table.vue";
+import { Endpoints, DataTypes, CaseCountRaw } from "@/types";
 
 export default Vue.extend({
   components: {
@@ -35,9 +68,9 @@ export default Vue.extend({
     );
     this.onResize();
     fetchData(Endpoints.CASES, "", "", "", false, false, true).then(
-      response => {
+      (response: any) => {
         if (response) {
-          this.data = response.map(getRatios);
+          this.data = response;
           const { confirmed, deaths, recovered } = response[
             response.length - 1
           ];
@@ -90,3 +123,26 @@ export default Vue.extend({
     }
   }
 });
+</script>
+
+<style scoped>
+.card {
+  background-color: rgba(0, 0, 0, 0.75);
+  z-index: 2;
+}
+.small-scale-down {
+  display: inline-block;
+  transform: scale(0.35);
+  transform-origin: top left;
+}
+.med-scale-down {
+  display: inline-block;
+  transform: scale(0.5);
+  transform-origin: top left;
+}
+.large-scale-down {
+  display: inline-block;
+  transform: scale(0.65);
+  transform-origin: top left;
+}
+</style>

@@ -8,7 +8,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import Root from "./components/Root/Root.vue";
+import Root from "./components/Root.vue";
 
 export default Vue.extend({
   components: {

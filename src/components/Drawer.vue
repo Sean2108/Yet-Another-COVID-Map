@@ -1,8 +1,98 @@
+<template>
+  <v-navigation-drawer
+    v-model="drawer"
+    color="grey darken-2"
+    width="550"
+    expand-on-hover
+    right
+    absolute
+    dark
+  >
+    <v-list-item nav>
+      <v-list-item-icon>
+        <v-icon>mdi-earth</v-icon>
+      </v-list-item-icon>
+
+      <v-list-item-content>
+        <v-list-item-title>Global Data</v-list-item-title>
+      </v-list-item-content>
+    </v-list-item>
+
+    <v-list nav three-line>
+      <v-list-item>
+        <v-list-item-icon>
+          <v-icon>mdi-counter</v-icon>
+        </v-list-item-icon>
+
+        <v-list-item-content>
+          <v-list-item-title>Statistics</v-list-item-title>
+          <v-list-item-subtitle v-if="data">
+            <p>Active cases: {{ getActive }}</p>
+            <p>
+              Confirmed cases: {{ getConfirmed }} (Infection rate of
+              {{ getInfectionRate }}%)
+            </p>
+            <p>
+              Deaths: {{ getDeaths }} (Fatality rate of {{ getFatalityRate }}%)
+            </p>
+            <p>
+              Recoveries: {{ getRecoveries }} (Recovery rate of
+              {{ getRecoveryRate }}%)
+            </p>
+          </v-list-item-subtitle>
+        </v-list-item-content>
+      </v-list-item>
+
+      <v-divider />
+
+      <v-list-item>
+        <v-list-item-icon>
+          <v-icon>mdi-chart-line</v-icon>
+        </v-list-item-icon>
+
+        <v-list-item-content>
+          <v-list-item-title>History</v-list-item-title>
+          <v-list-item-subtitle>
+            <Chart
+              v-if="data"
+              id="global-chart"
+              :data="data"
+              :width="460"
+              :height="200"
+              :legendX="295"
+              :legendY="55"
+              :marginLeft="60"
+              :marginRight="150"
+              :showPercentages="showPercentages"
+            />
+          </v-list-item-subtitle>
+        </v-list-item-content>
+      </v-list-item>
+
+      <v-divider />
+
+      <v-list-item>
+        <v-list-item-icon>
+          <v-icon>mdi-newspaper-variant</v-icon>
+        </v-list-item-icon>
+
+        <v-list-item-content>
+          <v-list-item-title>News</v-list-item-title>
+          <v-list-item-subtitle>
+            <News country="" :news="news" />
+          </v-list-item-subtitle>
+        </v-list-item-content>
+      </v-list-item>
+    </v-list>
+  </v-navigation-drawer>
+</template>
+
+<script lang="ts">
 import Vue from "vue";
-import { fetchData, getRatios } from "../../utils";
-import Chart from "../Chart/Chart.vue";
-import News from "../News/News.vue";
-import Table from "../Table/Table.vue";
+import { fetchData, getRatios } from "../utils";
+import Chart from "./Chart.vue";
+import News from "./News.vue";
+import Table from "./Table.vue";
 import { CaseCountRaw, NewsItem, DataTypes, Endpoints } from "@/types";
 
 const WORLD_POPULATION = 7800000000;
@@ -17,8 +107,7 @@ interface ComponentData {
 export default Vue.extend({
   components: {
     Chart,
-    News,
-    Table
+    News
   },
   props: {
     data: Array
@@ -129,3 +218,4 @@ export default Vue.extend({
     }
   }
 });
+</script>

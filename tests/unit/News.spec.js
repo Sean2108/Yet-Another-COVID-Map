@@ -1,5 +1,5 @@
 import { mount, createLocalVue } from "@vue/test-utils";
-import News from "../../src/components/News/News.vue";
+import News from "../../src/components/News.vue";
 import Vuetify from "vuetify";
 
 describe("News.vue", () => {
