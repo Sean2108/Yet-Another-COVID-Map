@@ -6,7 +6,7 @@ import {
   DataTypes,
   Endpoints,
   CaseCountAggregatedWithRatios
-} from "@/types";
+} from "./types";
 import _ from "lodash";
 
 export async function fetchData(
