@@ -4,7 +4,7 @@ import {
   getThreshold,
   getRatios
 } from "../../src/utils";
-import { DataTypes, CaseCountAggregatedWithRatios } from "@/types";
+import { DataTypes, CaseCountAggregatedWithRatios } from "../../src/types";
 
 describe("convertDataToGeoJson function", () => {
   function getTestData() {
