@@ -68,17 +68,6 @@ export default Vue.extend({
       const data = this.data as Array<CaseCountRaw>;
       const [, to] = this.range;
       return data[to].date;
-    },
-    typeText(): string {
-      switch (this.type) {
-        case DataTypes.CONFIRMED:
-          return "Confirmed cases";
-        case DataTypes.DEATHS:
-          return "Deaths";
-        case DataTypes.RECOVERIES:
-          return "Recoveries";
-      }
-      return "";
     }
   }
 });

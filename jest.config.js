@@ -1,11 +1,5 @@
 module.exports = {
-  globals: {
-    'ts-jest': {
-      babelConfig: true
-    }
-  },
-  preset: 'ts-jest',
-  testEnvironment: 'node',
-  "collectCoverage": true,
-  "collectCoverageFrom": ["**/*.{ts,vue}", "!**/node_modules/**", "!**/server.ts", "!**/main.ts", "!**/plugins/**"]
+  preset: "@vue/cli-plugin-unit-jest/presets/typescript-and-babel",
+  setupFiles: ["./tests/unit/setup.js"],
+  collectCoverage: true
 };

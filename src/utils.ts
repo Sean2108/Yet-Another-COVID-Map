@@ -5,7 +5,7 @@ import {
   CaseCountAggregated,
   DataTypes,
   Endpoints,
-  CaseCountAggregatedWithRatios,
+  CaseCountAggregatedWithRatios
 } from "./types";
 import _ from "lodash";
 
@@ -59,7 +59,7 @@ export function convertDataToGeoJson(
       Object.entries(states).map(
         ([
           state,
-          { lat, long, confirmed, deaths, recovered, population },
+          { lat, long, confirmed, deaths, recovered, population }
         ]): GeoJsonFeature => ({
           type: "Feature",
           properties: {
@@ -67,15 +67,15 @@ export function convertDataToGeoJson(
             country,
             state,
             population,
-            value: getValue(confirmed, deaths, recovered, type),
+            value: getValue(confirmed, deaths, recovered, type)
           },
-          geometry: { type: "Point", coordinates: [long, lat, 0.0] },
+          geometry: { type: "Point", coordinates: [long, lat, 0.0] }
         })
       )
     );
   return {
     type: "FeatureCollection",
-    features,
+    features
   };
 }
 function swap(arr: Array<number>, i: number, j: number) {
@@ -145,7 +145,7 @@ export function getRatios(
     ...item,
     confirmedRatio: population ? (confirmed / population) * 100 : 0,
     deathsRatio: confirmed ? (deaths / confirmed) * 100 : 0,
-    recoveredRatio: confirmed ? (recovered / confirmed) * 100 : 0,
+    recoveredRatio: confirmed ? (recovered / confirmed) * 100 : 0
   };
 }
 
@@ -169,6 +169,6 @@ export function getThreshold(
   const firstThresholdIndex = Math.floor(ratios.length / 3);
   return {
     firstThreshold: quickselect(ratioArr, firstThresholdIndex),
-    secondThreshold: quickselect(ratioArr, firstThresholdIndex * 2),
+    secondThreshold: quickselect(ratioArr, firstThresholdIndex * 2)
   };
 }
