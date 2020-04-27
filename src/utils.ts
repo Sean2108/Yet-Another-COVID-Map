@@ -5,7 +5,7 @@ import {
   CaseCountAggregated,
   DataTypes,
   Endpoints,
-  CaseCountAggregatedWithRatios
+  CaseCountAggregatedWithRatios,
 } from "./types";
 import _ from "lodash";
 
@@ -16,9 +16,12 @@ export async function fetchData(
   country: string,
   aggregateCountries: boolean,
   perDay: boolean,
-  worldTotal: boolean
+  worldTotal: boolean,
+  fetchFn: (
+    url: string
+  ) => Promise<{ status: number; json: () => Promise<any> }> = fetch
 ) {
-  const response = await fetch(
+  const response = await fetchFn(
     `https://yet-another-covid-api.herokuapp.com/${endpoint}?from=${from}&to=${to}&country=${country}&aggregatecountries=${aggregateCountries}&perday=${perDay}&worldtotal=${worldTotal}`
   );
   if (response.status !== 200) {
@@ -56,7 +59,7 @@ export function convertDataToGeoJson(
       Object.entries(states).map(
         ([
           state,
-          { lat, long, confirmed, deaths, recovered, population }
+          { lat, long, confirmed, deaths, recovered, population },
         ]): GeoJsonFeature => ({
           type: "Feature",
           properties: {
@@ -64,15 +67,15 @@ export function convertDataToGeoJson(
             country,
             state,
             population,
-            value: getValue(confirmed, deaths, recovered, type)
+            value: getValue(confirmed, deaths, recovered, type),
           },
-          geometry: { type: "Point", coordinates: [long, lat, 0.0] }
+          geometry: { type: "Point", coordinates: [long, lat, 0.0] },
         })
       )
     );
   return {
     type: "FeatureCollection",
-    features
+    features,
   };
 }
 function swap(arr: Array<number>, i: number, j: number) {
@@ -142,7 +145,7 @@ export function getRatios(
     ...item,
     confirmedRatio: population ? (confirmed / population) * 100 : 0,
     deathsRatio: confirmed ? (deaths / confirmed) * 100 : 0,
-    recoveredRatio: confirmed ? (recovered / confirmed) * 100 : 0
+    recoveredRatio: confirmed ? (recovered / confirmed) * 100 : 0,
   };
 }
 
@@ -166,6 +169,6 @@ export function getThreshold(
   const firstThresholdIndex = Math.floor(ratios.length / 3);
   return {
     firstThreshold: quickselect(ratioArr, firstThresholdIndex),
-    secondThreshold: quickselect(ratioArr, firstThresholdIndex * 2)
+    secondThreshold: quickselect(ratioArr, firstThresholdIndex * 2),
   };
 }

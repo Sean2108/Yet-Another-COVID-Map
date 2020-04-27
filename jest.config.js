@@ -7,5 +7,5 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   "collectCoverage": true,
-  "collectCoverageFrom": ["**/*.{ts,vue}", "!**/node_modules/**", "!**/server.ts", "!**/plugins/**"]
+  "collectCoverageFrom": ["**/*.{ts,vue}", "!**/node_modules/**", "!**/server.ts", "!**/main.ts", "!**/plugins/**"]
 };

@@ -2,9 +2,54 @@ import {
   convertDataToGeoJson,
   quickselect,
   getThreshold,
-  getRatios
+  getRatios,
+  fetchData,
 } from "../../src/utils";
-import { DataTypes, CaseCountAggregatedWithRatios } from "../../src/types";
+import {
+  DataTypes,
+  CaseCountAggregatedWithRatios,
+  Endpoints,
+} from "../../src/types";
+
+describe("fetchData function", () => {
+  it("should return json when response status is 200", async () => {
+    const expected = { test: 1 };
+    const json = jest.fn().mockResolvedValueOnce(expected);
+    const fetch = jest.fn().mockResolvedValueOnce({ status: 200, json });
+    const result = await fetchData(
+      Endpoints.CASES,
+      "4/26/20",
+      "4/27/20",
+      "",
+      false,
+      false,
+      true,
+      fetch
+    );
+    expect(fetch).toHaveBeenCalledWith(
+      "https://yet-another-covid-api.herokuapp.com/cases?from=4/26/20&to=4/27/20&country=&aggregatecountries=false&perday=false&worldtotal=true"
+    );
+    expect(result).toEqual(expected);
+  });
+  it("should return null when response status is not 200", async () => {
+    const json = jest.fn().mockResolvedValueOnce({ test: 1 });
+    const fetch = jest.fn().mockResolvedValueOnce({ status: 404, json });
+    const result = await fetchData(
+      Endpoints.NEWS,
+      "4/26/20",
+      "4/27/20",
+      "Singapore",
+      false,
+      false,
+      false,
+      fetch
+    );
+    expect(fetch).toHaveBeenCalledWith(
+      "https://yet-another-covid-api.herokuapp.com/news?from=4/26/20&to=4/27/20&country=Singapore&aggregatecountries=false&perday=false&worldtotal=false"
+    );
+    expect(result).toBe(null);
+  });
+});
 
 describe("convertDataToGeoJson function", () => {
   function getTestData() {
@@ -18,9 +63,9 @@ describe("convertDataToGeoJson function", () => {
             confirmed: 996,
             deaths: 33,
             recovered: 10,
-            population: 5000
-          }
-        }
+            population: 5000,
+          },
+        },
       },
       AL: {
         country: "Albania",
@@ -31,9 +76,9 @@ describe("convertDataToGeoJson function", () => {
             confirmed: 562,
             deaths: 26,
             recovered: 20,
-            population: 6000
-          }
-        }
+            population: 6000,
+          },
+        },
       },
       DZ: {
         country: "Algeria",
@@ -44,9 +89,9 @@ describe("convertDataToGeoJson function", () => {
             confirmed: 2629,
             deaths: 375,
             recovered: 30,
-            population: 7000
-          }
-        }
+            population: 7000,
+          },
+        },
       },
       AU: {
         country: "Australia",
@@ -57,7 +102,7 @@ describe("convertDataToGeoJson function", () => {
             confirmed: 2926,
             deaths: 26,
             recovered: 40,
-            population: 8000
+            population: 8000,
           },
           "Northern Territory": {
             lat: -12.4634,
@@ -65,10 +110,10 @@ describe("convertDataToGeoJson function", () => {
             confirmed: 28,
             deaths: 0,
             recovered: 5,
-            population: 9000
-          }
-        }
-      }
+            population: 9000,
+          },
+        },
+      },
     };
   }
 
@@ -82,9 +127,9 @@ describe("convertDataToGeoJson function", () => {
           country: "Afghanistan",
           state: "",
           population: 5000,
-          value: 996
+          value: 996,
         },
-        geometry: { type: "Point", coordinates: [65, 33, 0.0] }
+        geometry: { type: "Point", coordinates: [65, 33, 0.0] },
       },
       {
         type: "Feature",
@@ -93,9 +138,9 @@ describe("convertDataToGeoJson function", () => {
           country: "Albania",
           state: "",
           population: 6000,
-          value: 562
+          value: 562,
         },
-        geometry: { type: "Point", coordinates: [20.1683, 41.1533, 0.0] }
+        geometry: { type: "Point", coordinates: [20.1683, 41.1533, 0.0] },
       },
       {
         type: "Feature",
@@ -104,9 +149,9 @@ describe("convertDataToGeoJson function", () => {
           country: "Algeria",
           state: "",
           population: 7000,
-          value: 2629
+          value: 2629,
         },
-        geometry: { type: "Point", coordinates: [1.6596, 28.0339, 0.0] }
+        geometry: { type: "Point", coordinates: [1.6596, 28.0339, 0.0] },
       },
       {
         type: "Feature",
@@ -115,9 +160,9 @@ describe("convertDataToGeoJson function", () => {
           country: "Australia",
           state: "New South Wales",
           population: 8000,
-          value: 2926
+          value: 2926,
         },
-        geometry: { type: "Point", coordinates: [151.2093, -33.8688, 0.0] }
+        geometry: { type: "Point", coordinates: [151.2093, -33.8688, 0.0] },
       },
       {
         type: "Feature",
@@ -126,10 +171,10 @@ describe("convertDataToGeoJson function", () => {
           country: "Australia",
           state: "Northern Territory",
           population: 9000,
-          value: 28
+          value: 28,
         },
-        geometry: { type: "Point", coordinates: [130.8456, -12.4634, 0.0] }
-      }
+        geometry: { type: "Point", coordinates: [130.8456, -12.4634, 0.0] },
+      },
     ];
     expect(result.features).toEqual(expectedFeatures);
   });
@@ -144,9 +189,9 @@ describe("convertDataToGeoJson function", () => {
           country: "Afghanistan",
           state: "",
           population: 5000,
-          value: 33
+          value: 33,
         },
-        geometry: { type: "Point", coordinates: [65, 33, 0.0] }
+        geometry: { type: "Point", coordinates: [65, 33, 0.0] },
       },
       {
         type: "Feature",
@@ -155,9 +200,9 @@ describe("convertDataToGeoJson function", () => {
           country: "Albania",
           state: "",
           population: 6000,
-          value: 26
+          value: 26,
         },
-        geometry: { type: "Point", coordinates: [20.1683, 41.1533, 0.0] }
+        geometry: { type: "Point", coordinates: [20.1683, 41.1533, 0.0] },
       },
       {
         type: "Feature",
@@ -166,9 +211,9 @@ describe("convertDataToGeoJson function", () => {
           country: "Algeria",
           state: "",
           population: 7000,
-          value: 375
+          value: 375,
         },
-        geometry: { type: "Point", coordinates: [1.6596, 28.0339, 0.0] }
+        geometry: { type: "Point", coordinates: [1.6596, 28.0339, 0.0] },
       },
       {
         type: "Feature",
@@ -177,9 +222,9 @@ describe("convertDataToGeoJson function", () => {
           country: "Australia",
           state: "New South Wales",
           population: 8000,
-          value: 26
+          value: 26,
         },
-        geometry: { type: "Point", coordinates: [151.2093, -33.8688, 0.0] }
+        geometry: { type: "Point", coordinates: [151.2093, -33.8688, 0.0] },
       },
       {
         type: "Feature",
@@ -188,10 +233,10 @@ describe("convertDataToGeoJson function", () => {
           country: "Australia",
           state: "Northern Territory",
           population: 9000,
-          value: 0
+          value: 0,
         },
-        geometry: { type: "Point", coordinates: [130.8456, -12.4634, 0.0] }
-      }
+        geometry: { type: "Point", coordinates: [130.8456, -12.4634, 0.0] },
+      },
     ];
     expect(result.features).toEqual(expectedFeatures);
   });
@@ -206,9 +251,9 @@ describe("convertDataToGeoJson function", () => {
           country: "Afghanistan",
           state: "",
           population: 5000,
-          value: 10
+          value: 10,
         },
-        geometry: { type: "Point", coordinates: [65, 33, 0.0] }
+        geometry: { type: "Point", coordinates: [65, 33, 0.0] },
       },
       {
         type: "Feature",
@@ -217,9 +262,9 @@ describe("convertDataToGeoJson function", () => {
           country: "Albania",
           state: "",
           population: 6000,
-          value: 20
+          value: 20,
         },
-        geometry: { type: "Point", coordinates: [20.1683, 41.1533, 0.0] }
+        geometry: { type: "Point", coordinates: [20.1683, 41.1533, 0.0] },
       },
       {
         type: "Feature",
@@ -228,9 +273,9 @@ describe("convertDataToGeoJson function", () => {
           country: "Algeria",
           state: "",
           population: 7000,
-          value: 30
+          value: 30,
         },
-        geometry: { type: "Point", coordinates: [1.6596, 28.0339, 0.0] }
+        geometry: { type: "Point", coordinates: [1.6596, 28.0339, 0.0] },
       },
       {
         type: "Feature",
@@ -239,9 +284,9 @@ describe("convertDataToGeoJson function", () => {
           country: "Australia",
           state: "New South Wales",
           population: 8000,
-          value: 40
+          value: 40,
         },
-        geometry: { type: "Point", coordinates: [151.2093, -33.8688, 0.0] }
+        geometry: { type: "Point", coordinates: [151.2093, -33.8688, 0.0] },
       },
       {
         type: "Feature",
@@ -250,10 +295,10 @@ describe("convertDataToGeoJson function", () => {
           country: "Australia",
           state: "Northern Territory",
           population: 9000,
-          value: 5
+          value: 5,
         },
-        geometry: { type: "Point", coordinates: [130.8456, -12.4634, 0.0] }
-      }
+        geometry: { type: "Point", coordinates: [130.8456, -12.4634, 0.0] },
+      },
     ];
     expect(result.features).toEqual(expectedFeatures);
   });
@@ -268,9 +313,9 @@ describe("convertDataToGeoJson function", () => {
           country: "Afghanistan",
           state: "",
           population: 5000,
-          value: 953
+          value: 953,
         },
-        geometry: { type: "Point", coordinates: [65, 33, 0.0] }
+        geometry: { type: "Point", coordinates: [65, 33, 0.0] },
       },
       {
         type: "Feature",
@@ -279,9 +324,9 @@ describe("convertDataToGeoJson function", () => {
           country: "Albania",
           state: "",
           population: 6000,
-          value: 516
+          value: 516,
         },
-        geometry: { type: "Point", coordinates: [20.1683, 41.1533, 0.0] }
+        geometry: { type: "Point", coordinates: [20.1683, 41.1533, 0.0] },
       },
       {
         type: "Feature",
@@ -290,9 +335,9 @@ describe("convertDataToGeoJson function", () => {
           country: "Algeria",
           state: "",
           population: 7000,
-          value: 2224
+          value: 2224,
         },
-        geometry: { type: "Point", coordinates: [1.6596, 28.0339, 0.0] }
+        geometry: { type: "Point", coordinates: [1.6596, 28.0339, 0.0] },
       },
       {
         type: "Feature",
@@ -301,9 +346,9 @@ describe("convertDataToGeoJson function", () => {
           country: "Australia",
           state: "New South Wales",
           population: 8000,
-          value: 2860
+          value: 2860,
         },
-        geometry: { type: "Point", coordinates: [151.2093, -33.8688, 0.0] }
+        geometry: { type: "Point", coordinates: [151.2093, -33.8688, 0.0] },
       },
       {
         type: "Feature",
@@ -312,10 +357,10 @@ describe("convertDataToGeoJson function", () => {
           country: "Australia",
           state: "Northern Territory",
           population: 9000,
-          value: 23
+          value: 23,
         },
-        geometry: { type: "Point", coordinates: [130.8456, -12.4634, 0.0] }
-      }
+        geometry: { type: "Point", coordinates: [130.8456, -12.4634, 0.0] },
+      },
     ];
     expect(result.features).toEqual(expectedFeatures);
   });
@@ -327,31 +372,35 @@ describe("quickSelect function", () => {
       description: "should behave correctly when list has >k elements",
       input: [2, 6, 8, 4, 4, 1, -1],
       k: 4,
-      expected: 4
+      expected: 4,
     },
     {
       description: "should behave correctly when list has =k elements",
       input: [2, 6, 8, 4, 4, 1, 0, -1],
       k: 7,
-      expected: 8
+      expected: 8,
     },
     {
       description: "should return largest value when list has <k elements",
       input: [8, 4, 1],
       k: 4,
-      expected: 8
+      expected: 8,
     },
     {
       description: "should return smallest value when k is negative",
       input: [8, 4, 1],
       k: -1,
-      expected: 1
-    }
+      expected: 1,
+    },
   ];
   parameters.forEach(({ description, input, k, expected }) => {
     it(description, () => {
       expect(quickselect(input, k)).toEqual(expected);
     });
+  });
+
+  it("should throw for empty list", () => {
+    expect(() => quickselect([], 1)).toThrow();
   });
 });
 
@@ -364,7 +413,7 @@ describe("getThreshold function", () => {
       recovered: 2,
       population: 6,
       lat: 0,
-      long: 0
+      long: 0,
     }, // 50, 33.3, 66.7
     {
       country: "b",
@@ -373,7 +422,7 @@ describe("getThreshold function", () => {
       recovered: 2,
       population: 25,
       lat: 0,
-      long: 0
+      long: 0,
     }, // 20, 40, 40
     {
       country: "c",
@@ -382,7 +431,7 @@ describe("getThreshold function", () => {
       recovered: 5,
       population: 1000,
       lat: 0,
-      long: 0
+      long: 0,
     }, // 1, 30, 50
     {
       country: "d",
@@ -391,7 +440,7 @@ describe("getThreshold function", () => {
       recovered: 15,
       population: 3000,
       lat: 0,
-      long: 0
+      long: 0,
     }, // 1.5, 20, 75
     {
       country: "e",
@@ -400,7 +449,7 @@ describe("getThreshold function", () => {
       recovered: 5,
       population: 160,
       lat: 0,
-      long: 0
+      long: 0,
     }, // 5, 37.5, 62.5
     {
       country: "f",
@@ -409,8 +458,8 @@ describe("getThreshold function", () => {
       recovered: 7,
       population: 36,
       lat: 0,
-      long: 0
-    } // 25, 22.2, 77.8
+      long: 0,
+    }, // 25, 22.2, 77.8
   ];
   // after sorting confirmed ratios: [1, 1.5, 5, 20, 25, 50]
   // after sorting death ratios: [20, 22.2, 30, 33.3, 37.5, 40]
@@ -421,7 +470,7 @@ describe("getThreshold function", () => {
     const result = getThreshold(items, DataTypes.CONFIRMED);
     expect(result).toEqual({
       firstThreshold: 5,
-      secondThreshold: 25
+      secondThreshold: 25,
     });
   });
 
@@ -430,7 +479,7 @@ describe("getThreshold function", () => {
     const result = getThreshold(items, DataTypes.DEATHS);
     expect(result).toEqual({
       firstThreshold: 30,
-      secondThreshold: 37.5
+      secondThreshold: 37.5,
     });
   });
 
@@ -439,7 +488,7 @@ describe("getThreshold function", () => {
     const result = getThreshold(items, DataTypes.RECOVERIES);
     expect(result).toEqual({
       firstThreshold: 62.5,
-      secondThreshold: 75
+      secondThreshold: 75,
     });
   });
 });
