@@ -1,6 +1,6 @@
 # Yet Another COVID Map
 
-![CI](https://github.com/Sean2108/Yet-Another-COVID-Map/workflows/CI/badge.svg)
+![CI](https://github.com/Sean2108/Yet-Another-COVID-Map/workflows/CI/badge.svg)[![codecov](https://codecov.io/gh/Sean2108/Yet-Another-COVID-Map/branch/master/graph/badge.svg)](https://codecov.io/gh/Sean2108/Yet-Another-COVID-Map)
 
 Dashboard displaying statistics and historical information on COVID19.
 

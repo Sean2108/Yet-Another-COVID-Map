@@ -44,7 +44,7 @@
         >
         <v-expansion-panel-content>
           <Chart
-            :data="stateData"
+            :chartData="stateData"
             id="stateChart"
             :width="420"
             :height="200"
@@ -107,7 +107,7 @@
         >
         <v-expansion-panel-content>
           <Chart
-            :data="countryData"
+            :chartData="countryData"
             id="countryChart"
             :width="420"
             :height="200"

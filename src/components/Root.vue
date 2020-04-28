@@ -9,7 +9,7 @@
       />
     </v-overlay>
     <Map v-if="data.length" :worldData="data" />
-    <Drawer v-if="data.length" :data="data" />
+    <Drawer v-if="data.length" :worldData="data" />
     <v-layout column fluid :class="scaleClass">
       <Filters
         v-if="data.length"
@@ -70,7 +70,7 @@ export default Vue.extend({
     fetchData(Endpoints.CASES, "", "", "", false, false, true).then(
       (response: any) => {
         if (response) {
-          this.data = response;
+          this.data = response.map(getRatios);
           const { confirmed, deaths, recovered } = response[
             response.length - 1
           ];

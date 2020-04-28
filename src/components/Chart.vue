@@ -27,13 +27,13 @@ const RATIO_MAPPING = [
 export default Vue.extend({
   mounted() {
     this.drawGraph(
-      this.data as Array<ChartInputWithRawDate>,
+      this.chartData as Array<ChartInputWithRawDate>,
       this.showPercentages
     );
   },
   props: {
     id: String,
-    data: Array,
+    chartData: Array,
     width: Number,
     height: Number,
     legendX: Number,
@@ -43,13 +43,13 @@ export default Vue.extend({
     showPercentages: Boolean
   },
   watch: {
-    data: function(newVal) {
+    chartData: function(newVal) {
       d3.selectAll(`#${this.id} > svg`).remove();
       this.drawGraph(newVal, this.showPercentages);
     },
     showPercentages: function(newVal: boolean) {
       d3.selectAll(`#${this.id} > svg`).remove();
-      this.drawGraph(this.data as any, newVal);
+      this.drawGraph(this.chartData as any, newVal);
     }
   },
   methods: {

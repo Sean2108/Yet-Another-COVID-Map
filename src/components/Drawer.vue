@@ -26,7 +26,7 @@
 
         <v-list-item-content>
           <v-list-item-title>Statistics</v-list-item-title>
-          <v-list-item-subtitle v-if="data">
+          <v-list-item-subtitle v-if="worldData">
             <p>Active cases: {{ getActive }}</p>
             <p>
               Confirmed cases: {{ getConfirmed }} (Infection rate of
@@ -54,9 +54,9 @@
           <v-list-item-title>History</v-list-item-title>
           <v-list-item-subtitle>
             <Chart
-              v-if="data"
+              v-if="worldData"
               id="global-chart"
-              :data="data"
+              :chartData="worldData"
               :width="460"
               :height="200"
               :legendX="295"
@@ -110,7 +110,7 @@ export default Vue.extend({
     News
   },
   props: {
-    data: Array
+    worldData: Array
   },
   data(): ComponentData {
     return {
@@ -124,13 +124,11 @@ export default Vue.extend({
     fetchData(Endpoints.NEWS, "", "", "", false, false, false).then(
       response => (this.news = response || [])
     );
+    this.range = [0, this.worldData.length - 1];
     this.$root.$on(
       "onChangeShowPercentages",
       (value: boolean) => (this.showPercentages = value)
     );
-  },
-  mounted() {
-    this.range = [0, this.data.length - 1];
     this.$root.$on(
       "changeDateRange",
       (range: Array<number>) => (this.range = range)
@@ -139,28 +137,28 @@ export default Vue.extend({
   computed: {
     getConfirmed: function(): number {
       return this.getStats(
-        this.data as Array<CaseCountRaw>,
+        this.worldData as Array<CaseCountRaw>,
         DataTypes.CONFIRMED,
         this.range
       );
     },
     getDeaths: function(): number {
       return this.getStats(
-        this.data as Array<CaseCountRaw>,
+        this.worldData as Array<CaseCountRaw>,
         DataTypes.DEATHS,
         this.range
       );
     },
     getRecoveries: function(): number {
       return this.getStats(
-        this.data as Array<CaseCountRaw>,
+        this.worldData as Array<CaseCountRaw>,
         DataTypes.RECOVERIES,
         this.range
       );
     },
     getActive: function(): number {
       return this.getStats(
-        this.data as Array<CaseCountRaw>,
+        this.worldData as Array<CaseCountRaw>,
         DataTypes.ACTIVE,
         this.range
       );
@@ -173,8 +171,8 @@ export default Vue.extend({
             deaths: this.getDeaths,
             recovered: this.getRecoveries,
             population: WORLD_POPULATION
-          }).confirmedRatio * 100
-        ) / 100
+          }).confirmedRatio * 1000
+        ) / 1000
       );
     },
     getFatalityRate: function(): number {
@@ -214,7 +212,7 @@ export default Vue.extend({
           0
         );
       }
-      return data[to][key] - (from === 0 ? 0 : data[from][key]);
+      return data[to][key] - (from === 0 ? 0 : data[from - 1][key]);
     }
   }
 });
