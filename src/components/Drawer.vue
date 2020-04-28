@@ -92,7 +92,6 @@ import Vue from "vue";
 import { fetchData, getRatios } from "../utils";
 import Chart from "./Chart.vue";
 import News from "./News.vue";
-import Table from "./Table.vue";
 import { CaseCountRaw, NewsItem, DataTypes, Endpoints } from "@/types";
 
 const WORLD_POPULATION = 7800000000;

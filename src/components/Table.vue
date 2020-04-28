@@ -198,6 +198,9 @@ export default Vue.extend({
         false,
         false
       );
+      this.handleResponse(response);
+    },
+    handleResponse(response: AggCountryCaseCounts) {
       this.items = Object.values(response).map(getRatios);
       if (this.items.length) {
         this.thresholds = {
@@ -257,13 +260,13 @@ export default Vue.extend({
       if (
         ((type === DataTypes.CONFIRMED || type === DataTypes.DEATHS) &&
           ratio < firstThreshold) ||
-        (type === DataTypes.RECOVERIES && ratio >= secondThreshold)
+        (type === DataTypes.RECOVERIES && ratio > secondThreshold)
       ) {
         baseInfo = goodResult;
       } else if (
         ((type === DataTypes.CONFIRMED || type === DataTypes.DEATHS) &&
           ratio > secondThreshold) ||
-        (type === DataTypes.RECOVERIES && ratio <= secondThreshold)
+        (type === DataTypes.RECOVERIES && ratio < firstThreshold)
       ) {
         baseInfo = badResult;
       } else {
