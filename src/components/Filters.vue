@@ -1,17 +1,10 @@
 <template>
-  <v-card v-if="data" dark raised :width="width">
+  <v-card v-if="worldData" dark raised :width="width">
     <v-card-title class="justify-center">
       <v-icon class="hidden-sm-and-down" large left>
         mdi-filter
       </v-icon>
-      <span
-        :class="{
-          title: $vuetify.breakpoint.mdAndUp,
-          'subtitle-1': $vuetify.breakpoint.smAndDown,
-          'font-weight-light': true
-        }"
-        >Filters</span
-      >
+      <span class="title font-weight-light">Filters</span>
     </v-card-title>
 
     <v-card-actions style="margin-top: 2rem;">
@@ -25,21 +18,20 @@
         thumb-label="always"
         :thumb-size="45"
         thumb-color="grey darken-2"
-        :prepend-icon="$vuetify.breakpoint.mdAndUp ? 'mdi-calendar-range' : ''"
-        :dense="$vuetify.breakpoint.smAndDown"
+        prepend-icon="mdi-calendar-range"
         dark
       >
         <template dark v-slot:thumb-label="{ value }">
-          {{ data[value].date }}
+          {{ worldData[value].date }}
         </template>
       </v-range-slider> </v-card-actions
     ><v-card-actions>
       <v-select
-        :prepend-icon="$vuetify.breakpoint.mdAndUp ? 'mdi-human-male-male' : ''"
+        id="type-select"
+        prepend-icon="mdi-human-male-male"
         v-model="typeSelection"
         :items="items"
         v-on:input="changeType"
-        :dense="$vuetify.breakpoint.smAndDown"
         dark
         solo
       />
@@ -82,17 +74,17 @@ export default Vue.extend({
     }
   }),
   props: {
-    data: Array,
+    worldData: Array,
     width: String
   },
   mounted() {
-    this.max = this.data.length - 1;
+    this.max = this.worldData.length - 1;
     this.range = [0, this.max];
   },
   methods: {
     debouncedEmitChangeDates: _.debounce(function(this: any) {
       const [from, to] = this.range;
-      const data = this.data as Array<CaseCountRaw>;
+      const data = this.worldData as Array<CaseCountRaw>;
       this.$root.$emit("changeDates", {
         range: this.range,
         from: data[from].date,
@@ -100,6 +92,7 @@ export default Vue.extend({
       });
     }, 1000),
     updateDates(range: Array<number>) {
+      this.range = range;
       this.$root.$emit("changeDateRange", range);
       this.debouncedEmitChangeDates();
     },
@@ -110,12 +103,12 @@ export default Vue.extend({
   },
   computed: {
     from(): string {
-      const data = this.data as Array<CaseCountRaw>;
+      const data = this.worldData as Array<CaseCountRaw>;
       const [from] = this.range;
       return data[from].date;
     },
     to(): string {
-      const data = this.data as Array<CaseCountRaw>;
+      const data = this.worldData as Array<CaseCountRaw>;
       const [, to] = this.range;
       return data[to].date;
     }

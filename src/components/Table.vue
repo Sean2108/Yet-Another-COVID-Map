@@ -5,11 +5,7 @@
         mdi-table-furniture
       </v-icon>
       <span
-        :class="{
-          title: $vuetify.breakpoint.mdAndUp,
-          'subtitle-1': $vuetify.breakpoint.smAndDown,
-          'font-weight-light': true
-        }"
+        class="title font-weight-light"
         >Country Data</span
       >
     </v-card-title>

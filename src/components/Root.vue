@@ -14,7 +14,7 @@
       <Filters
         v-if="data.length"
         class="card"
-        :data="data"
+        :worldData="data"
         :width="overlayCardWidth"
       />
       <br />
