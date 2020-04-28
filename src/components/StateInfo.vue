@@ -10,27 +10,16 @@
         <v-expansion-panel-content>
           <br />
           <p>
-            Active cases:
-            {{
-              Math.max(
-                newestStateData.confirmed -
-                  newestStateData.deaths -
-                  newestStateData.recovered,
-                0
-              )
-            }}
+            {{ getStatisticsDescription(newestStateData, "active") }}
           </p>
           <p>
-            Confirmed cases: {{ newestStateData.confirmed }} (Infection rate of
-            {{ Math.round(newestStateData.confirmedRatio * 100) / 100 }}%)
+            {{ getStatisticsDescription(newestStateData, "confirmed") }}
           </p>
           <p>
-            Deaths: {{ newestStateData.deaths }} (Fatality rate of
-            {{ Math.round(newestStateData.deathsRatio * 100) / 100 }}%)
+            {{ getStatisticsDescription(newestStateData, "deaths") }}
           </p>
           <p>
-            Recoveries: {{ newestStateData.recovered }} (Recovery rate of
-            {{ Math.round(newestStateData.recoveredRatio * 100) / 100 }}%)
+            {{ getStatisticsDescription(newestStateData, "recovered") }}
           </p>
         </v-expansion-panel-content>
       </v-expansion-panel>
@@ -69,28 +58,16 @@
           <br />
           <template v-if="countryData">
             <p>
-              Active cases:
-              {{
-                Math.max(
-                  newestCountryData.confirmed -
-                    newestCountryData.deaths -
-                    newestCountryData.recovered,
-                  0
-                )
-              }}
+              {{ getStatisticsDescription(newestCountryData, "active") }}
             </p>
             <p>
-              Confirmed cases: {{ newestCountryData.confirmed }} (Infection rate
-              of
-              {{ Math.round(newestCountryData.confirmedRatio * 100) / 100 }}%)
+              {{ getStatisticsDescription(newestCountryData, "confirmed") }}
             </p>
             <p>
-              Deaths: {{ newestCountryData.deaths }} (Fatality rate of
-              {{ Math.round(newestCountryData.deathsRatio * 100) / 100 }}%)
+              {{ getStatisticsDescription(newestCountryData, "deaths") }}
             </p>
             <p>
-              Recoveries: {{ newestCountryData.recovered }} (Recovery rate of
-              {{ Math.round(newestCountryData.recoveredRatio * 100) / 100 }}%)
+              {{ getStatisticsDescription(newestCountryData, "recovered") }}
             </p>
           </template>
         </v-expansion-panel-content>
@@ -140,7 +117,13 @@ import Vue from "vue";
 import News from "./News.vue";
 import Chart from "./Chart.vue";
 import { fetchData, getRatios } from "../utils";
-import { NewsItem, Endpoints, CaseCountAggregatedWithRatios } from "@/types";
+import {
+  NewsItem,
+  Endpoints,
+  CaseCountAggregated,
+  CaseCountAggregatedWithRatios,
+  DataTypes
+} from "@/types";
 import Vuetify from "vuetify";
 
 Vue.use(Vuetify);
@@ -184,7 +167,11 @@ export default Vue.extend({
     fetchData(Endpoints.CASES, "", "", this.iso, true, true, false).then(
       response => {
         if (response) {
-          this.countryData = response[this.iso].counts.map(getRatios);
+          const countryInfo = response[this.iso];
+          this.countryData = countryInfo.counts.map(
+            (item: CaseCountAggregated) =>
+              getRatios({ ...item, population: countryInfo.population })
+          );
         }
       }
     );
@@ -204,6 +191,42 @@ export default Vue.extend({
   methods: {
     getHeader: function() {
       return this.state ? `${this.state} (${this.country})` : this.country;
+    },
+    getStatisticsDescription: function(data: any, type: DataTypes) {
+      if (type === DataTypes.ACTIVE) {
+        const active = Math.max(
+          data.confirmed - data.deaths - data.recovered,
+          0
+        );
+        return `Active cases: ${active}`;
+      }
+      const roundingDivisor = type === DataTypes.CONFIRMED ? 1000 : 100;
+      return `${this.getPrefix(type)}: ${data[type]} (${this.getRateType(
+        type
+      )} rate of ${Math.round(data[type + "Ratio"] * roundingDivisor) /
+        roundingDivisor}%)`;
+    },
+    getPrefix: function(type: DataTypes) {
+      switch (type) {
+        case DataTypes.DEATHS:
+          return "Deaths";
+        case DataTypes.RECOVERIES:
+          return "Recoveries";
+        case DataTypes.CONFIRMED:
+        default:
+          return "Confirmed cases";
+      }
+    },
+    getRateType: function(type: DataTypes) {
+      switch (type) {
+        case DataTypes.DEATHS:
+          return "Fatality";
+        case DataTypes.RECOVERIES:
+          return "Recovery";
+        case DataTypes.CONFIRMED:
+        default:
+          return "Infection";
+      }
     }
   }
 });

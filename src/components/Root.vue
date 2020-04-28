@@ -68,24 +68,23 @@ export default Vue.extend({
     );
     this.onResize();
     fetchData(Endpoints.CASES, "", "", "", false, false, true).then(
-      (response: any) => {
-        if (response) {
-          this.data = response.map(getRatios);
-          const { confirmed, deaths, recovered } = response[
-            response.length - 1
-          ];
-          this.counts = {
-            [DataTypes.CONFIRMED]: confirmed,
-            [DataTypes.DEATHS]: deaths,
-            [DataTypes.RECOVERIES]: recovered,
-            [DataTypes.ACTIVE]: Math.max(confirmed - deaths - recovered, 0)
-          };
-        }
-        this.loading = false;
-      }
+      this.setLoadedData
     );
   },
   methods: {
+    setLoadedData(response: any) {
+      if (response) {
+        this.data = response.map(getRatios);
+        const { confirmed, deaths, recovered } = response[response.length - 1];
+        this.counts = {
+          [DataTypes.CONFIRMED]: confirmed,
+          [DataTypes.DEATHS]: deaths,
+          [DataTypes.RECOVERIES]: recovered,
+          [DataTypes.ACTIVE]: Math.max(confirmed - deaths - recovered, 0)
+        };
+      }
+      this.loading = false;
+    },
     onResize() {
       const { innerWidth, innerHeight } = window;
       // probably a mobile device

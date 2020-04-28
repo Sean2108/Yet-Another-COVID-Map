@@ -4,10 +4,7 @@
       <v-icon class="hidden-sm-and-down" large left>
         mdi-table-furniture
       </v-icon>
-      <span
-        class="title font-weight-light"
-        >Country Data</span
-      >
+      <span class="title font-weight-light">Country Data</span>
     </v-card-title>
     <v-card-subtitle class="py-0">
       <v-row>

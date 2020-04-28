@@ -1,7 +1,6 @@
 import { mount, createLocalVue, createWrapper } from "@vue/test-utils";
 import Filters from "../../src/components/Filters.vue";
 import Vuetify from "vuetify";
-jest.useFakeTimers();
 
 describe("Filter.vue", () => {
   let localVue, wrapper;
@@ -16,10 +15,10 @@ describe("Filter.vue", () => {
         worldData: [
           { date: "2/1/20", confirmed: 20, deaths: 5, recovered: 10 },
           { date: "2/2/20", confirmed: 50, deaths: 15, recovered: 25 },
-          { date: "2/3/20", confirmed: 75, deaths: 15, recovered: 40 },
+          { date: "2/3/20", confirmed: 75, deaths: 15, recovered: 40 }
         ],
-        width: "50px",
-      },
+        width: "50px"
+      }
     });
   });
 

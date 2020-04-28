@@ -13,7 +13,7 @@ import {
   Endpoints,
   CaseCountAggregatedWithLocation
 } from "@/types";
-import Vuetify from "vuetify/lib";
+import Vuetify from "vuetify";
 import StateInfo from "./StateInfo.vue";
 
 // below thresholds are expressed as a fraction of the world total between the given dates
@@ -144,7 +144,7 @@ export default Vue.extend({
       const prop = isCluster ? "sum" : "value";
       const colours =
         this.type === DataTypes.RECOVERIES
-          ? CIRCLE_COLOURS.reverse()
+          ? [...CIRCLE_COLOURS].reverse()
           : CIRCLE_COLOURS;
       return {
         "circle-color": [
@@ -167,6 +167,58 @@ export default Vue.extend({
         ]
       };
     },
+    onClickClusters(e: any, map: mapboxgl.Map) {
+      const features = map.queryRenderedFeatures(e.point, {
+        layers: ["clusters"]
+      });
+      const clusterId = features[0]?.properties?.cluster_id;
+      (map.getSource(
+        "cases"
+      ) as mapboxgl.GeoJSONSource).getClusterExpansionZoom(clusterId, function(
+        err: any,
+        zoom: any
+      ) {
+        if (err) return;
+
+        map.easeTo({
+          center: (features[0].geometry as any).coordinates,
+          zoom
+        });
+      });
+    },
+    onClickNonClusters(e: any, map: mapboxgl.Map) {
+      if (e && e.features && e.features[0] && e.features[0].properties) {
+        const coordinates = (e.features[0].geometry as any).coordinates.slice();
+        const properties = e.features[0].properties;
+        const { iso, country, state } = properties;
+        while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+          coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+        }
+        const info = new StateInfo({
+          vuetify: new Vuetify(),
+          propsData: {
+            country,
+            iso,
+            state,
+            showPercentages: this.showPercentages
+          }
+        }).$mount();
+        this.$watch(
+          "showPercentages",
+          newValue => (info.$props.showPercentages = newValue)
+        );
+        if (info) {
+          new mapboxgl.Popup({
+            closeButton: false,
+            maxWidth: this.getPopupWidth(),
+            className: "popup"
+          })
+            .setLngLat(coordinates)
+            .setDOMContent(info.$el)
+            .addTo(map);
+        }
+      }
+    },
     setupMap(map: mapboxgl.Map) {
       const data = this.data;
       if (!data) {
@@ -185,60 +237,9 @@ export default Vue.extend({
       this.drawLayer(map, true);
       this.drawLayer(map, false);
 
-      map.on("click", "clusters", function(e: any) {
-        const features = map.queryRenderedFeatures(e.point, {
-          layers: ["clusters"]
-        });
-        const clusterId = features[0]?.properties?.cluster_id;
-        (map.getSource(
-          "cases"
-        ) as mapboxgl.GeoJSONSource).getClusterExpansionZoom(
-          clusterId,
-          function(err: any, zoom: any) {
-            if (err) return;
+      map.on("click", "clusters", e => this.onClickClusters(e, map));
 
-            map.easeTo({
-              center: (features[0].geometry as any).coordinates,
-              zoom
-            });
-          }
-        );
-      });
-
-      map.on("click", "non-clusters", e => {
-        if (e && e.features && e.features[0] && e.features[0].properties) {
-          const coordinates = (e.features[0]
-            .geometry as any).coordinates.slice();
-          const properties = e.features[0].properties;
-          const { iso, country, state } = properties;
-          while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-            coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-          }
-          const info = new StateInfo({
-            vuetify: new Vuetify(),
-            propsData: {
-              country,
-              iso,
-              state,
-              showPercentages: this.showPercentages
-            }
-          }).$mount();
-          this.$watch(
-            "showPercentages",
-            newValue => (info.$props.showPercentages = newValue)
-          );
-          if (info) {
-            new mapboxgl.Popup({
-              closeButton: false,
-              maxWidth: this.getPopupWidth(),
-              className: "popup"
-            })
-              .setLngLat(coordinates)
-              .setDOMContent(info.$el)
-              .addTo(map);
-          }
-        }
-      });
+      map.on("click", "non-clusters", e => this.onClickNonClusters(e, map));
       this.setupMouseEnterAndLeave(map, "clusters");
       this.setupMouseEnterAndLeave(map, "non-clusters");
       this.$root.$emit("setLoading", false);

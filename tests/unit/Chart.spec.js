@@ -2,6 +2,9 @@ import { shallowMount, createLocalVue } from "@vue/test-utils";
 import Chart from "../../src/components/Chart.vue";
 import * as d3 from "d3";
 import Vuetify from "vuetify";
+import * as utils from "../../src/utils";
+
+utils.fetchData = jest.fn();
 
 describe("Chart.vue", () => {
   let localVue, wrapper;
