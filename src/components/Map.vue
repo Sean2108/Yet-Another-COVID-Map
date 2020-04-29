@@ -22,7 +22,7 @@ const THRESHOLDS = [0, 0.001, 0.1, 0.3];
 const INITIAL_ZOOM = 2;
 const MIN_ZOOM = 1;
 const ON_CLICK_ZOOM = 4;
-const MAX_ZOOM = 7;
+const MAX_ZOOM = 11;
 
 const CIRCLE_COLOURS = ["lime", "yellow", "orange", "red"];
 const CIRCLE_RADII = [15, 25, 35, 40];
