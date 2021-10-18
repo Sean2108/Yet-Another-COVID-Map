@@ -37,8 +37,8 @@ describe("StateInfo.vue", () => {
   });
 
   it("should have elements when data is retrieved", async () => {
-    wrapper.vm.$data.stateData = [1];
-    wrapper.vm.$data.countryData = [2];
+    wrapper.vm.$data.stateData = [{active: 4, confirmed: 5, deaths: 0, recovered: 1}];
+    wrapper.vm.$data.countryData = [{active: 40, confirmed: 50, deaths: 2, recovered: 8}];
     wrapper.vm.$data.news = [3];
     await localVue.nextTick();
     expect(wrapper.findAll(".hidden-md-and-down").length).toEqual(2);
