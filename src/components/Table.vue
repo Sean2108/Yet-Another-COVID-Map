@@ -55,7 +55,7 @@
                 >{{
                   showPercentages
                     ? `${Math.round(item.confirmedRatio * 1000) / 1000}%`
-                    : item.confirmed
+                    : item.confirmed.toLocaleString()
                 }}</v-chip
               >
             </template>
@@ -74,7 +74,7 @@
                 >{{
                   showPercentages
                     ? `${Math.round(item.deathsRatio * 100) / 100}%`
-                    : item.deaths
+                    : item.deaths.toLocaleString()
                 }}</v-chip
               >
             </template>
@@ -93,7 +93,7 @@
                 >{{
                   showPercentages
                     ? `${Math.round(item.recoveredRatio * 100) / 100}%`
-                    : item.recovered
+                    : item.recovered.toLocaleString()
                 }}</v-chip
               >
             </template>

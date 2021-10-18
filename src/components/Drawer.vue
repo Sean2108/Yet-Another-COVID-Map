@@ -27,18 +27,18 @@
         <v-list-item-content>
           <v-list-item-title>Statistics</v-list-item-title>
           <v-list-item-subtitle v-if="worldData">
-            <p>Active cases: {{ getActive }}</p>
-            <p>
-              Confirmed cases: {{ getConfirmed }} (Infection rate of
+            <v-list-item-subtitle>Active cases: {{ getActiveFormatted }}</v-list-item-subtitle>
+            <v-list-item-subtitle>
+              Confirmed cases: {{ getConfirmedFormatted }} (Infection rate of
               {{ getInfectionRate }}%)
-            </p>
-            <p>
-              Deaths: {{ getDeaths }} (Fatality rate of {{ getFatalityRate }}%)
-            </p>
-            <p>
-              Recoveries: {{ getRecoveries }} (Recovery rate of
+            </v-list-item-subtitle>
+            <v-list-item-subtitle>
+              Deaths: {{ getDeathsFormatted }} (Fatality rate of {{ getFatalityRate }}%)
+            </v-list-item-subtitle>
+            <v-list-item-subtitle>
+              Recoveries: {{ getRecoveriesFormatted }} (Recovery rate of
               {{ getRecoveryRate }}%)
-            </p>
+            </v-list-item-subtitle>
           </v-list-item-subtitle>
         </v-list-item-content>
       </v-list-item>
@@ -61,7 +61,7 @@
               :height="200"
               :legendX="295"
               :legendY="55"
-              :marginLeft="60"
+              :marginLeft="70"
               :marginRight="150"
               :showPercentages="showPercentages"
             />
@@ -161,6 +161,18 @@ export default Vue.extend({
         DataTypes.ACTIVE,
         this.range
       );
+    },
+    getConfirmedFormatted: function(): string {
+      return this.getConfirmed.toLocaleString();
+    },
+    getDeathsFormatted: function(): string {
+      return this.getDeaths.toLocaleString();
+    },
+    getRecoveriesFormatted: function(): string {
+      return this.getRecoveries.toLocaleString();
+    },
+    getActiveFormatted: function(): string {
+      return this.getActive.toLocaleString();
     },
     getInfectionRate: function(): number {
       return (
