@@ -39,7 +39,7 @@
             :height="200"
             :legendX="265"
             :legendY="55"
-            :marginLeft="45"
+            :marginLeft="55"
             :marginRight="115"
             :showPercentages="showPercentages"
           />
@@ -90,7 +90,7 @@
             :height="200"
             :legendX="270"
             :legendY="55"
-            :marginLeft="45"
+            :marginLeft="55"
             :marginRight="115"
             :showPercentages="showPercentages"
           />
@@ -122,7 +122,7 @@ import {
   Endpoints,
   CaseCountAggregated,
   CaseCountAggregatedWithRatios,
-  DataTypes
+  DataTypes,
 } from "@/types";
 import Vuetify from "vuetify";
 
@@ -137,25 +137,25 @@ interface ComponentData {
 export default Vue.extend({
   components: {
     News,
-    Chart
+    Chart,
   },
   data(): ComponentData {
     return {
       stateData: [],
       countryData: [],
-      news: []
+      news: [],
     };
   },
   props: {
     country: String,
     state: String,
     iso: String,
-    showPercentages: Boolean
+    showPercentages: Boolean,
   },
   created() {
     if (this.state) {
       fetchData(Endpoints.CASES, "", "", this.iso, false, true, false).then(
-        response => {
+        (response) => {
           if (response) {
             this.stateData = response[this.iso].states[this.state].counts.map(
               getRatios
@@ -165,7 +165,7 @@ export default Vue.extend({
       );
     }
     fetchData(Endpoints.CASES, "", "", this.iso, true, true, false).then(
-      response => {
+      (response) => {
         if (response) {
           const countryInfo = response[this.iso];
           this.countryData = countryInfo.counts.map(
@@ -177,7 +177,7 @@ export default Vue.extend({
     );
 
     fetchData(Endpoints.NEWS, "", "", this.country, false, false, false).then(
-      response => (this.news = response || [])
+      (response) => (this.news = response || [])
     );
   },
   computed: {
@@ -186,7 +186,7 @@ export default Vue.extend({
     },
     newestCountryData(): CaseCountAggregatedWithRatios {
       return this.countryData[this.countryData.length - 1];
-    }
+    },
   },
   methods: {
     getHeader: function() {
@@ -198,13 +198,14 @@ export default Vue.extend({
           data.confirmed - data.deaths - data.recovered,
           0
         );
-        return `Active cases: ${active}`;
+        return `Active cases: ${active.toLocaleString()}`;
       }
       const roundingDivisor = type === DataTypes.CONFIRMED ? 1000 : 100;
-      return `${this.getPrefix(type)}: ${data[type]} (${this.getRateType(
+      return `${this.getPrefix(type)}: ${data[
         type
-      )} rate of ${Math.round(data[type + "Ratio"] * roundingDivisor) /
-        roundingDivisor}%)`;
+      ].toLocaleString()} (${this.getRateType(type)} rate of ${Math.round(
+        data[type + "Ratio"] * roundingDivisor
+      ) / roundingDivisor}%)`;
     },
     getPrefix: function(type: DataTypes) {
       switch (type) {
@@ -227,7 +228,7 @@ export default Vue.extend({
         default:
           return "Infection";
       }
-    }
-  }
+    },
+  },
 });
 </script>

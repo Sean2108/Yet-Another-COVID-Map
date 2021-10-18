@@ -4,7 +4,7 @@
       <div class="title font-weight-light">Total {{ header }}</div>
     </v-card-title>
     <v-card-subtitle class="display-2 text-center red--text font-weight-medium">
-      {{ data[type] }}
+      {{ data[type].toLocaleString() }}
     </v-card-subtitle>
   </v-card>
 </template>
